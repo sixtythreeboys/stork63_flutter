@@ -74,17 +74,11 @@ class _MultiSwitchState extends State<MultiSwitch> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          children: [
             customSwitch('연속 하락/상승', val1, onChangeFunction1),
-            Option1(val1: val1)
-          ],
+            Option1(val1: val1),
+            customSwitch('조건 2', val2, onChangeFunction2)
+      ]
 
-        ),
-
-        customSwitch('조건 2', val2, onChangeFunction2)
-
-      ],
     );
   }
 
@@ -130,26 +124,60 @@ class Result extends StatelessWidget {
   }
 }
 
-class Option1 extends StatelessWidget {
+class Option1 extends StatefulWidget {
   Option1({Key? key, required this.val1}) : super(key: key);
 
   bool val1;
+
+  @override
+  State<Option1> createState() => _Option1State();
+}
+
+class _Option1State extends State<Option1> {
+  List<Widget> fruits = <Widget>[
+    Text('하락'),
+    Text('상승')
+  ];
+  final List<bool> _selectedFruits = <bool>[true, false];
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: val1,
+      visible: widget.val1,
       child: Padding(
         padding: const EdgeInsets.only(top: 22.0, left: 16.0, right: 16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("선택", style: const TextStyle(
-                fontSize: 17.0,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w400,
-                color: Colors.black
-            )),
+            const SizedBox(
+              width: 70.0,
+              child: TextField(
+                style: TextStyle(fontSize: 20.0, height: 1.0, color: Colors.black),
+              ),
+            ),
+            Text("일 연속"),
+            Spacer(),
+            ToggleButtons(
 
+              onPressed: (int index) {
+                setState(() {
+                  // The button that is tapped is set to true, and the others to false.
+                  for (int i = 0; i < _selectedFruits.length; i++) {
+                    _selectedFruits[i] = i == index;
+                  }
+                });
+              },
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              selectedBorderColor: Colors.blue[700],
+              selectedColor: Colors.white,
+              fillColor: Colors.blue[200],
+              color: Colors.blue[400],
+              constraints: const BoxConstraints(
+                minHeight: 40.0,
+                minWidth: 80.0,
+              ),
+              isSelected: _selectedFruits,
+              children: fruits,
+            ),
           ],
         ),
       ),
