@@ -1,14 +1,43 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'stock.dart';
+import 'style.dart' as style;
+import 'package:http/http.dart' as http;
 
 void main() {
-  runApp(const MaterialApp(
+  runApp(MaterialApp(
     home: MyApp(),
+    theme: style.theme,
   ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  var data;
+
+  getData() async{
+    var result = await http.get(Uri.parse('http://15.164.171.244:8000/domestic/kospi/list?period=2&gradient=1'));
+    var result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    setState(() {
+      data = result2;
+    });
+  }
+
+  @override
+  void initState(){
+    super.initState();
+    getData();
+
+  }
 
 
   @override
@@ -22,7 +51,7 @@ class MyApp extends StatelessWidget {
               onPressed: (){
                 Navigator.push(context,
                     MaterialPageRoute(builder: (c)
-                    => const Result()
+                    => StockList(data: data,)
                     )
                 );
               },
@@ -30,6 +59,8 @@ class MyApp extends StatelessWidget {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home_outlined),label: '홈'),
           BottomNavigationBarItem(icon: Icon(Icons.shopping_bag_outlined),label: '샵')
@@ -51,7 +82,7 @@ class MultiSwitch extends StatefulWidget {
 
 class _MultiSwitchState extends State<MultiSwitch> {
 
-  bool val1 = true;
+  bool val1 = false;
   bool val2 = false;
 
   onChangeFunction1(bool newValue1){
@@ -76,7 +107,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
       children: [
             customSwitch('연속 하락/상승', val1, onChangeFunction1),
             Option1(val1: val1),
-            customSwitch('조건 2', val2, onChangeFunction2)
+            customSwitch('조건 2', val2, onChangeFunction2),
       ]
 
     );
@@ -110,19 +141,6 @@ class _MultiSwitchState extends State<MultiSwitch> {
 }
 
 
-class Result extends StatelessWidget {
-  const Result({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Container(
-        child: Text("ws"),
-      ),
-    );
-  }
-}
 
 class Option1 extends StatefulWidget {
   Option1({Key? key, required this.val1}) : super(key: key);
@@ -169,6 +187,7 @@ class _Option1State extends State<Option1> {
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               selectedBorderColor: Colors.blue[700],
               selectedColor: Colors.white,
+              textStyle: TextStyle(),
               fillColor: Colors.blue[200],
               color: Colors.blue[400],
               constraints: const BoxConstraints(
@@ -184,3 +203,5 @@ class _Option1State extends State<Option1> {
     );
   }
 }
+
+
