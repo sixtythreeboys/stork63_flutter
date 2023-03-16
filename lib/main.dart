@@ -22,23 +22,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  var data;
-
-  getData() async{
-    var result = await http.get(Uri.parse('http://15.164.171.244:8000/domestic/kospi/list?period=2&gradient=1'));
-    var result2 = jsonDecode(utf8.decode(result.bodyBytes));
-    setState(() {
-      data = result2;
-    });
-  }
-
-  @override
-  void initState(){
-    super.initState();
-    getData();
-
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +34,7 @@ class _MyAppState extends State<MyApp> {
               onPressed: (){
                 Navigator.push(context,
                     MaterialPageRoute(builder: (c)
-                    => StockList(data: data,)
+                    => StockList()
                     )
                 );
               },
