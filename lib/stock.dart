@@ -48,66 +48,79 @@ class _StockListState extends State<StockList> {
   @override
   Widget build(BuildContext context) {
     if (data.isNotEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          iconTheme: IconThemeData(color: Colors.grey),
-          elevation: 0.0,
-        ),
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: StockOverView(),
+      return DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                labelColor: Colors.black,
+                tabs: [
+                  Tab(text: "국내",),
+                  Tab(text: "해외",)],
+              ),
+              backgroundColor: Colors.white,
+              iconTheme: IconThemeData(color: Colors.grey),
+              elevation: 0.0,
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int i) {
-                  return Container(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 22.0, left: 16.0, right: 16.0),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.5,
-                                child: Text(
-                                  data[i]['htsKorIsnm'],
-                                  style: textStyle1,
-                                ),
+            body: TabBarView(
+              children: [
+                CustomScrollView(
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: StockOverView(),
+                    ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (BuildContext context, int i) {
+                          return Container(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 22.0, left: 16.0, right: 16.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: MediaQuery.of(context).size.width * 0.5,
+                                        child: Text(
+                                          data[i]['htsKorIsnm'],
+                                          style: textStyle1,
+                                        ),
+                                      ),
+                                      Container(
+                                          width:
+                                          MediaQuery.of(context).size.width * 0.3,
+                                          child: Text(
+                                            data[i]['avlsScalClsCode'],
+                                            style: textStyle1,
+                                          )),
+                                      Container(
+                                          width:
+                                          MediaQuery.of(context).size.width * 0.1,
+                                          child: Text(
+                                            data[i]['krxBankYn'],
+                                            style: textStyle1,
+                                          ))
+                                    ],
+                                  ),
+                                  Divider(
+                                    thickness: 2,
+                                  )
+                                ],
                               ),
-                              Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: Text(
-                                    data[i]['avlsScalClsCode'],
-                                    style: textStyle1,
-                                  )),
-                              Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.1,
-                                  child: Text(
-                                    data[i]['krxBankYn'],
-                                    style: textStyle1,
-                                  ))
-                            ],
-                          ),
-                          Divider(
-                            thickness: 2,
-                          )
-                        ],
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      );
+                  ],
+                ),
+                Icon(Icons.call),
+              ],
+            )
+          ));
     } else {
       return Center(child: CircularProgressIndicator());
     }
@@ -142,6 +155,8 @@ class StockOverView extends StatelessWidget {
     );
   }
 }
+
+
 
 var textStyle1 = TextStyle(
     fontSize: 20.0,
