@@ -51,76 +51,120 @@ class _StockListState extends State<StockList> {
       return DefaultTabController(
           length: 2,
           child: Scaffold(
-            appBar: AppBar(
-              bottom: TabBar(
-                labelColor: Colors.black,
-                tabs: [
-                  Tab(text: "국내",),
-                  Tab(text: "해외",)],
-              ),
-              backgroundColor: Colors.white,
-              iconTheme: IconThemeData(color: Colors.grey),
-              elevation: 0.0,
-            ),
-            body: TabBarView(
-              children: [
-                CustomScrollView(
-                  slivers: [
-                    const SliverToBoxAdapter(
-                      child: StockOverView(),
+              appBar: AppBar(
+                bottom: TabBar(
+                  labelColor: Colors.black,
+                  tabs: const [
+                    Tab(
+                      text: "국내",
                     ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                            (BuildContext context, int i) {
-                          return Container(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                  top: 22.0, left: 16.0, right: 16.0),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        width: MediaQuery.of(context).size.width * 0.5,
-                                        child: Text(
-                                          data[i]['htsKorIsnm'],
-                                          style: textStyle1,
-                                        ),
-                                      ),
-                                      Container(
-                                          width:
-                                          MediaQuery.of(context).size.width * 0.3,
-                                          child: Text(
-                                            data[i]['avlsScalClsCode'],
-                                            style: textStyle1,
-                                          )),
-                                      Container(
-                                          width:
-                                          MediaQuery.of(context).size.width * 0.1,
-                                          child: Text(
-                                            data[i]['krxBankYn'],
-                                            style: textStyle1,
-                                          ))
-                                    ],
-                                  ),
-                                  Divider(
-                                    thickness: 2,
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                    Tab(
+                      text: "해외",
+                    )
                   ],
+                  indicatorColor: Colors.black,
                 ),
-                Icon(Icons.call),
-              ],
-            )
-          ));
+                backgroundColor: Colors.white,
+                iconTheme: IconThemeData(color: Colors.grey),
+                elevation: 0.0,
+              ),
+              body: TabBarView(
+                children: [
+                  CustomScrollView(
+                    slivers: [
+                      const SliverToBoxAdapter(
+                        child: StockOverView(),
+                      ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (BuildContext context, int i) {
+                            return Container(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 22.0, left: 16.0, right: 16.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                          width: 21,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              i.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 18.0,
+                                                  fontFamily: 'Roboto',
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.blue),
+                                            )),
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10),
+                                          alignment: Alignment.centerLeft,
+                                          child: CircleAvatar(
+                                            radius: 20, // 반지름 크기
+                                            backgroundColor: Colors.grey, // 배경색
+                                            child: Icon(Icons.person,
+                                                size: 30,
+                                                color: Colors.white), // 프로필 아이콘
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 240,
+                                          margin: EdgeInsets.only(left: 7),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(
+                                                  data[i]['htsKorIsnm'],
+                                                  style: textStyle1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(
+                                                  '1000원',
+                                                  style: TextStyle(
+                                                      fontSize: 15.0,
+                                                      fontFamily: 'Roboto',
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        // Container(
+                                        //     child: Text(
+                                        //       data[i]['avlsScalClsCode'],
+                                        //       style: textStyle1,
+                                        //     )),
+                                        Container(
+                                            child: Text(
+                                          data[i]['krxBankYn'],
+                                          style: textStyle1,
+                                        )),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  Icon(Icons.call),
+                ],
+              )));
     } else {
       return Center(child: CircularProgressIndicator());
     }
@@ -133,30 +177,49 @@ class StockOverView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
-          top: 22.0, left: 16.0, right: 16.0),
+      padding: const EdgeInsets.only(top: 22.0, left: 16.0, right: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            child: Text("거래량 Top100", style:TextStyle(fontSize: 30.0, fontFamily: 'Roboto',fontWeight: FontWeight.w700,color: Colors.black),),
+            child: Text(
+              "거래량 Top100",
+              style: TextStyle(
+                  fontSize: 30.0,
+                  fontFamily: 'Roboto',
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black),
+            ),
           ),
           Container(
-            child: Text("많이 사고 많이 팔고 있어요",style:TextStyle(fontSize: 16.0, fontFamily: 'Roboto',fontWeight: FontWeight.w500,color: Colors.black)),
+            child: Text("많이 사고 많이 팔고 있어요",
+                style: TextStyle(
+                    fontSize: 16.0,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black)),
           ),
           Container(
-            child: Text("오늘 12:37 기준",style:TextStyle(fontSize: 15.0, fontFamily: 'Roboto',fontWeight: FontWeight.w400,color: Colors.grey)),
+            child: Text("오늘 12:37 기준",
+                style: TextStyle(
+                    fontSize: 15.0,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey)),
           ),
           Container(
-            child: Text("거래소 지정 위험 주식 차트에서 제외되었어요",style:TextStyle(fontSize: 15.0, fontFamily: 'Roboto',fontWeight: FontWeight.w400,color: Colors.grey)),
+            child: Text("거래소 지정 위험 주식 차트에서 제외되었어요",
+                style: TextStyle(
+                    fontSize: 15.0,
+                    fontFamily: 'Roboto',
+                    fontWeight: FontWeight.w400,
+                    color: Colors.grey)),
           )
         ],
       ),
     );
   }
 }
-
-
 
 var textStyle1 = TextStyle(
     fontSize: 20.0,
