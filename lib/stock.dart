@@ -78,11 +78,31 @@ class _StockListState extends State<StockList> {
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (BuildContext context, int i) {
-                            return Container(
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 22.0, left: 16.0, right: 16.0),
-                                child: Column(
+                            return ListTile(
+                              onTap: () {
+                                Navigator.push(context,MaterialPageRoute<Widget>(builder: (BuildContext context) {
+                                  return Scaffold(
+                                    appBar: AppBar(title: const Text('ListTile Hero')),
+                                    body: Center(
+                                      child: Hero(
+                                        tag: 'ListTile-Hero',
+                                        child: Material(
+                                          child: ListTile(
+                                            title: Text(i.toString()),
+                                            subtitle: const Text('Tap here to go back'),
+                                            tileColor: Colors.blue[700],
+                                            onTap: () {
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                                );
+                              },
+                                title: Column(
                                   children: [
                                     Row(
                                       mainAxisAlignment:
@@ -155,9 +175,9 @@ class _StockListState extends State<StockList> {
                                     ),
                                   ],
                                 ),
-                              ),
-                            );
+                              );
                           },
+                          childCount: data.length
                         ),
                       ),
                     ],
