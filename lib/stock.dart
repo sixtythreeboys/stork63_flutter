@@ -29,6 +29,7 @@ class StockList extends StatefulWidget {
 class _StockListState extends State<StockList> {
   var scroll = ScrollController();
   var data = [];
+  var data2 = [];
 
   getData() async {
     var result = await http.get(Uri.parse(
@@ -36,6 +37,14 @@ class _StockListState extends State<StockList> {
     var result2 = jsonDecode(utf8.decode(result.bodyBytes));
     setState(() {
       data = result2;
+    });
+
+    var resultOversea = await http.get(Uri.parse(
+        'http://15.164.171.244:8000/oversea/service1_1?datelength=1&target=UP&temp=10'));
+    var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
+    setState(() {
+      data2 = resultOversea2;
+      print(data2);
     });
   }
 
@@ -47,7 +56,7 @@ class _StockListState extends State<StockList> {
 
   @override
   Widget build(BuildContext context) {
-    if (data.isNotEmpty) {
+    if (data.isNotEmpty && data2.isNotEmpty) {
       return DefaultTabController(
           length: 2,
           child: Scaffold(
@@ -182,7 +191,118 @@ class _StockListState extends State<StockList> {
                       ),
                     ],
                   ),
-                  Icon(Icons.call),
+                  CustomScrollView(
+                    slivers: [
+                      const SliverToBoxAdapter(
+                        child: StockOverView(),
+                      ),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                                (BuildContext context, int i) {
+                              return ListTile(
+                                onTap: () {
+                                  Navigator.push(context,MaterialPageRoute<Widget>(builder: (BuildContext context) {
+                                    return Scaffold(
+                                      appBar: AppBar(title: const Text('ListTile Hero')),
+                                      body: Center(
+                                        child: Hero(
+                                          tag: 'ListTile-Hero',
+                                          child: Material(
+                                            child: ListTile(
+                                              title: Text(i.toString()),
+                                              subtitle: const Text('Tap here to go back'),
+                                              tileColor: Colors.blue[700],
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                  );
+                                },
+                                title: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.center,
+                                      children: [
+                                        Container(
+                                            width: 21,
+                                            alignment: Alignment.center,
+                                            child: Text(
+                                              i.toString(),
+                                              style: TextStyle(
+                                                  fontSize: 18.0,
+                                                  fontFamily: 'Roboto',
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.blue),
+                                            )),
+                                        Container(
+                                          margin: EdgeInsets.only(left: 10),
+                                          alignment: Alignment.centerLeft,
+                                          child: CircleAvatar(
+                                            radius: 20, // 반지름 크기
+                                            backgroundColor: Colors.grey, // 배경색
+                                            child: Icon(Icons.person,
+                                                size: 30,
+                                                color: Colors.white), // 프로필 아이콘
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 240,
+                                          margin: EdgeInsets.only(left: 7),
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(
+                                                  data2[i]['name'],
+                                                  style: textStyle1,
+                                                  overflow:
+                                                  TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                              Container(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text(
+                                                  '1000원',
+                                                  style: TextStyle(
+                                                      fontSize: 15.0,
+                                                      fontFamily: 'Roboto',
+                                                      fontWeight:
+                                                      FontWeight.w600,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        // Container(
+                                        //     child: Text(
+                                        //       data[i]['avlsScalClsCode'],
+                                        //       style: textStyle1,
+                                        //     )),
+                                        Container(
+                                            child: Text(
+                                              data2[i]['dataList'][0]['sign'].toString(),
+                                              style: textStyle1,
+                                            )),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            childCount: data2.length
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               )));
     } else {
