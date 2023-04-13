@@ -21,6 +21,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,11 +31,12 @@ class _MyAppState extends State<MyApp> {
       ),
       body: Column(
         children: [
-          const MultiSwitch(),
+          MultiSwitch(),
           ElevatedButton(
               onPressed: () {
                 Navigator.push(
                     context, MaterialPageRoute(builder: (c) => StockList()));
+
               },
               child: Text("조회"))
         ],

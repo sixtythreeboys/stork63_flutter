@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 
 
 class MultiSwitch extends StatefulWidget {
-  const MultiSwitch({Key? key}) : super(key: key);
-
+  MultiSwitch({Key? key}) : super(key: key);
   @override
   State<MultiSwitch> createState() => _MultiSwitchState();
 }
@@ -13,6 +12,19 @@ class MultiSwitch extends StatefulWidget {
 class _MultiSwitchState extends State<MultiSwitch> {
   bool val1 = false;
   bool val2 = false;
+
+  List<Widget> fruits = <Widget>[Text('하락'), Text('상승')];
+  List<bool> _selectedFruits = <bool>[true, false];
+
+  void _onToggle(int index) {
+    setState(() {
+      // The button that is tapped is set to true, and the others to false.
+      for (int i = 0; i < _selectedFruits.length; i++) {
+        _selectedFruits[i] = i == index;
+      }
+      print(_selectedFruits);
+    });
+  }
 
   onChangeFunction1(bool newValue1) {
     setState(() {
@@ -34,7 +46,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           customSwitch('연속 하락/상승', val1, onChangeFunction1),
-          Option1(val1: val1),
+          option1(),
           customSwitch('조건 2', val2, onChangeFunction2),
         ]);
   }
@@ -63,26 +75,11 @@ class _MultiSwitchState extends State<MultiSwitch> {
       ),
     );
   }
-}
 
-class Option1 extends StatefulWidget {
-  Option1({Key? key, required this.val1}) : super(key: key);
+  Widget option1(){
 
-  bool val1;
-
-  @override
-  State<Option1> createState() => _Option1State();
-}
-
-class _Option1State extends State<Option1> {
-  TextEditingController _textController = TextEditingController();
-  List<Widget> fruits = <Widget>[Text('하락'), Text('상승')];
-  final List<bool> _selectedFruits = <bool>[true, false];
-
-  @override
-  Widget build(BuildContext context) {
     return Visibility(
-      visible: widget.val1,
+      visible: val1,
       child: Padding(
         padding: const EdgeInsets.only(top: 22.0, left: 16.0, right: 16.0),
         child: Row(
@@ -98,14 +95,7 @@ class _Option1State extends State<Option1> {
             Text("일 연속"),
             Spacer(),
             ToggleButtons(
-              onPressed: (int index) {
-                setState(() {
-                  // The button that is tapped is set to true, and the others to false.
-                  for (int i = 0; i < _selectedFruits.length; i++) {
-                    _selectedFruits[i] = i == index;
-                  }
-                });
-              },
+              onPressed: _onToggle,
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               selectedBorderColor: Colors.blue[700],
               selectedColor: Colors.white,
@@ -123,5 +113,6 @@ class _Option1State extends State<Option1> {
         ),
       ),
     );
+
   }
 }

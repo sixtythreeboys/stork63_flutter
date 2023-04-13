@@ -11,6 +11,7 @@ class StockList extends StatefulWidget {
 }
 
 class _StockListState extends State<StockList> {
+
   var scroll = ScrollController();
   var data = [];
   var data2 = [];
