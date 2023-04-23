@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-
+import 'package:stock63/stock_list.dart';
 
 class MultiSwitch extends StatefulWidget {
   MultiSwitch({Key? key}) : super(key: key);
+
   @override
   State<MultiSwitch> createState() => _MultiSwitchState();
 }
@@ -12,9 +12,12 @@ class MultiSwitch extends StatefulWidget {
 class _MultiSwitchState extends State<MultiSwitch> {
   bool val1 = false;
   bool val2 = false;
+  bool searchButtonEnabled = false;
+  var gradient = 0;
+  var period = '';
 
   List<Widget> fruits = <Widget>[Text('하락'), Text('상승')];
-  List<bool> _selectedFruits = <bool>[true, false];
+  final List<bool> _selectedFruits = <bool>[true, false];
 
   void _onToggle(int index) {
     setState(() {
@@ -22,20 +25,30 @@ class _MultiSwitchState extends State<MultiSwitch> {
       for (int i = 0; i < _selectedFruits.length; i++) {
         _selectedFruits[i] = i == index;
       }
-      print(_selectedFruits);
+      print(index);
+      gradient = index;
+      print(gradient);
     });
   }
 
   onChangeFunction1(bool newValue1) {
     setState(() {
-      print(val1);
       val1 = newValue1;
+      updateSearchButtonState();
+      print(val1);
     });
   }
 
   onChangeFunction2(bool newValue2) {
     setState(() {
       val2 = newValue2;
+      updateSearchButtonState();
+    });
+  }
+
+  void updateSearchButtonState() {
+    setState(() {
+      searchButtonEnabled = val1 || val2;
     });
   }
 
@@ -48,6 +61,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
           customSwitch('연속 하락/상승', val1, onChangeFunction1),
           option1(),
           customSwitch('조건 2', val2, onChangeFunction2),
+          _searchButton()
         ]);
   }
 
@@ -70,14 +84,13 @@ class _MultiSwitchState extends State<MultiSwitch> {
               value: val,
               onChanged: (newValue) {
                 onChangeMethod(newValue);
-              })
+              }),
         ],
       ),
     );
   }
 
-  Widget option1(){
-
+  Widget option1() {
     return Visibility(
       visible: val1,
       child: Padding(
@@ -85,11 +98,17 @@ class _MultiSwitchState extends State<MultiSwitch> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SizedBox(
+            SizedBox(
               width: 70.0,
               child: TextField(
                 style:
-                TextStyle(fontSize: 20.0, height: 1.0, color: Colors.black),
+                    TextStyle(fontSize: 20.0, height: 1.0, color: Colors.black),
+                onChanged: (text) {
+                  print(text);
+                  setState(() {
+                    period = text;
+                  });
+                },
               ),
             ),
             Text("일 연속"),
@@ -113,6 +132,27 @@ class _MultiSwitchState extends State<MultiSwitch> {
         ),
       ),
     );
+  }
 
+  Widget _searchButton() {
+    return Container(
+      alignment: Alignment.center,
+      child: ElevatedButton(
+        onPressed: searchButtonEnabled ? () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (c) => StockList(gradient: gradient, period: period)));
+        } : null,
+        style: ButtonStyle(
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+            if (states.contains(MaterialState.disabled)) {
+              return Theme.of(context).primaryColor.withOpacity(0.5);
+            } else {
+              return Theme.of(context).primaryColor;
+            }
+          }),
+        ),
+        child: Text("조회"),
+      ),
+    );
   }
 }

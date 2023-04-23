@@ -29,18 +29,7 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: Colors.white,
         shadowColor: Colors.transparent,
       ),
-      body: Column(
-        children: [
-          MultiSwitch(),
-          ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (c) => StockList()));
-
-              },
-              child: Text("조회"))
-        ],
-      ),
+      body: MultiSwitch(),
       bottomNavigationBar: BottomNavigationBar(
         showSelectedLabels: false,
         showUnselectedLabels: false,

@@ -1,26 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:stock63/stock_detail.dart';
 import 'style.dart' as style;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class StockList extends StatefulWidget {
-  const StockList({Key? key}) : super(key: key);
+  StockList({Key? key, this.gradient, this.period}) : super(key: key);
+
+  var gradient;
+  var period;
 
   @override
   State<StockList> createState() => _StockListState();
 }
 
 class _StockListState extends State<StockList> {
-
   var scroll = ScrollController();
   var data = [];
   var data2 = [];
+  bool isLoading = true;
+
+  void startLoading() async {
+    await Future.delayed(Duration(seconds: 5));
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   getData() async {
     var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/list?period=4&gradient=-1'));
+        'http://15.164.171.244:8000/domestic/kospi/list?period=${widget.period}&gradient=${widget.gradient}'));
     var result2 = jsonDecode(utf8.decode(result.bodyBytes));
     setState(() {
+      print(widget.period);
+      print(widget.gradient);
       data = List<dynamic>.from(result2);
       print(data);
     });
@@ -28,7 +41,7 @@ class _StockListState extends State<StockList> {
 
   getOverseaData() async {
     var resultOversea = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/oversea/list?period=1&gradient=1'));
+        'http://15.164.171.244:8000/oversea/list?period=${widget.period}&gradient=${widget.gradient}'));
     var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
     setState(() {
       data2 = List<dynamic>.from(resultOversea2);
@@ -41,6 +54,7 @@ class _StockListState extends State<StockList> {
     super.initState();
     getData();
     getOverseaData();
+    startLoading();
   }
 
   @override
@@ -51,10 +65,7 @@ class _StockListState extends State<StockList> {
             appBar: AppBar(
               bottom: TabBar(
                 labelColor: Colors.black,
-                tabs: const [
-                  Tab(text: "국내"),
-                  Tab(text: "해외")
-                ],
+                tabs: const [Tab(text: "국내"), Tab(text: "해외")],
                 indicatorColor: Colors.black,
               ),
               backgroundColor: Colors.white,
@@ -63,9 +74,7 @@ class _StockListState extends State<StockList> {
             ),
             body: TabBarView(
               children: [_domestic(), _overSea()],
-            )
-        )
-    );
+            )));
   }
 
   Widget _domestic() {
@@ -82,24 +91,7 @@ class _StockListState extends State<StockList> {
                   Navigator.push(
                     context,
                     MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return Scaffold(
-                        appBar: AppBar(title: const Text('ListTile Hero')),
-                        body: Center(
-                          child: Hero(
-                            tag: 'ListTile-Hero',
-                            child: Material(
-                              child: ListTile(
-                                title: Text(i.toString()),
-                                subtitle: const Text('Tap here to go back'),
-                                tileColor: Colors.blue[700],
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
+                      return StockDetail(i: i + 1);
                     }),
                   );
                 },
@@ -110,10 +102,10 @@ class _StockListState extends State<StockList> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                            width: 21,
+                            width: 34,
                             alignment: Alignment.center,
                             child: Text(
-                              i.toString(),
+                              (i + 1).toString(),
                               style: TextStyle(
                                   fontSize: 18.0,
                                   fontFamily: 'Roboto',
@@ -156,16 +148,16 @@ class _StockListState extends State<StockList> {
                                           color: Colors.grey),
                                     ),
                                     Text(
-                                      ' ${data[i]['prdyCtrt'].toString()}%',
+                                      ' ${data[i]['totalCtrt'].toString()}%',
                                       style: TextStyle(
                                           fontSize: 15.0,
                                           fontFamily: 'Roboto',
                                           fontWeight: FontWeight.w600,
-                                          color: data[i]['prdyCtrt'] == 0
+                                          color: data[i]['totalCtrt'] == 0
                                               ? Colors.grey
-                                              : data[i]['prdyCtrt'] > 0
-                                              ? Colors.red
-                                              : Colors.blue),
+                                              : data[i]['totalCtrt'] > 0
+                                                  ? Colors.red
+                                                  : Colors.blue),
                                     ),
                                   ],
                                 ),
@@ -192,7 +184,7 @@ class _StockListState extends State<StockList> {
           ),
         ],
       );
-    }else{
+    } else {
       return Container(
         alignment: Alignment.center,
         child: CircularProgressIndicator(),
@@ -201,138 +193,126 @@ class _StockListState extends State<StockList> {
   }
 
   Widget _overSea() {
-    if(data2.isNotEmpty){
-    return CustomScrollView(
-      slivers: [
-        const SliverToBoxAdapter(
-          child: StockOverView(),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate((BuildContext context, int i) {
-            return ListTile(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                    return Scaffold(
-                      appBar: AppBar(title: const Text('ListTile Hero')),
-                      body: Center(
-                        child: Hero(
-                          tag: 'ListTile-Hero',
-                          child: Material(
-                            child: ListTile(
-                              title: Text(i.toString()),
-                              subtitle: const Text('Tap here to go back'),
-                              tileColor: Colors.blue[700],
-                              onTap: () {
-                                Navigator.pop(context);
-                              },
-                            ),
+    if (data2.isNotEmpty) {
+      return CustomScrollView(
+        slivers: [
+          const SliverToBoxAdapter(
+            child: StockOverView(),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate((BuildContext context, int i) {
+              return ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
+                      return StockDetail(i: i + 1);
+                    }),
+                  );
+                },
+                title: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                            width: 21,
+                            alignment: Alignment.center,
+                            child: Text(
+                              (i + 1).toString(),
+                              style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.blue),
+                            )),
+                        Container(
+                          margin: EdgeInsets.only(left: 10),
+                          alignment: Alignment.centerLeft,
+                          child: CircleAvatar(
+                            radius: 20, // 반지름 크기
+                            backgroundColor: Colors.grey, // 배경색
+                            child: Icon(Icons.person,
+                                size: 30, color: Colors.white), // 프로필 아이콘
                           ),
                         ),
-                      ),
-                    );
-                  }),
-                );
-              },
-              title: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                          width: 21,
-                          alignment: Alignment.center,
-                          child: Text(
-                            i.toString(),
-                            style: TextStyle(
-                                fontSize: 18.0,
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue),
-                          )),
-                      Container(
-                        margin: EdgeInsets.only(left: 10),
-                        alignment: Alignment.centerLeft,
-                        child: CircleAvatar(
-                          radius: 20, // 반지름 크기
-                          backgroundColor: Colors.grey, // 배경색
-                          child: Icon(Icons.person,
-                              size: 30, color: Colors.white), // 프로필 아이콘
-                        ),
-                      ),
-                      Container(
-                        width: 240,
-                        margin: EdgeInsets.only(left: 7),
-                        child: Column(
-                          children: [
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                data2[i]['htsKorIsnm'].toString(),
-                                style: textStyle1,
-                                overflow: TextOverflow.ellipsis,
+                        Container(
+                          width: 240,
+                          margin: EdgeInsets.only(left: 7),
+                          child: Column(
+                            children: [
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  data2[i]['htsKorIsnm'].toString(),
+                                  style: textStyle1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                            ),
-                            Container(
-                              alignment: Alignment.centerLeft,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    '${data[i]['stckClpr'].toString()}달러',
-                                    style: TextStyle(
-                                        fontSize: 15.0,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.grey),
-                                  ),
-                                  Text(
-                                    ' ${data[i]['prdyCtrt'].toString()}%',
-                                    style: TextStyle(
-                                        fontSize: 15.0,
-                                        fontFamily: 'Roboto',
-                                        fontWeight: FontWeight.w600,
-                                        color: data[i]['prdyCtrt'] == 0
-                                            ? Colors.grey
-                                            : data[i]['prdyCtrt'] > 0
-                                            ? Colors.red
-                                            : Colors.blue),
-                                  ),
-                                ],
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      '${data2[i]['stckClpr'].toString()}달러',
+                                      style: TextStyle(
+                                          fontSize: 15.0,
+                                          fontFamily: 'Roboto',
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.grey),
+                                    ),
+                                    Text(
+                                      ' ${data2[i]['totalCtrt'].toString()}%',
+                                      style: TextStyle(
+                                          fontSize: 15.0,
+                                          fontFamily: 'Roboto',
+                                          fontWeight: FontWeight.w600,
+                                          color: data2[i]['totalCtrt'] == 0
+                                              ? Colors.grey
+                                              : data2[i]['totalCtrt'] > 0
+                                                  ? Colors.red
+                                                  : Colors.blue),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      // Container(
-                      //     child: Text(
-                      //       data[i]['avlsScalClsCode'],
-                      //       style: textStyle1,
-                      //     )),
-                      // Container(
-                      //     child: Text(
-                      //   data2[i]['totalCtrt'].toString(),
-                      //   style: textStyle1,
-                      // )),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          }, childCount: data2.length),
-        ),
-      ],
-    );
-    }else{
-      return Container(
-        alignment: Alignment.center,
-        child: CircularProgressIndicator(),
+                        // Container(
+                        //     child: Text(
+                        //       data[i]['avlsScalClsCode'],
+                        //       style: textStyle1,
+                        //     )),
+                        // Container(
+                        //     child: Text(
+                        //   data2[i]['totalCtrt'].toString(),
+                        //   style: textStyle1,
+                        // )),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }, childCount: data2.length),
+          ),
+        ],
       );
+    } else {
+      if (isLoading) {
+        return Container(
+          alignment: Alignment.center,
+          child: CircularProgressIndicator(),
+        );
+      } else {
+        return Container(
+          alignment: Alignment.center,
+          child: Text("데이터가 없거나 인터넷이 불안정합니다."),
+        );
+      }
     }
-
   }
-
 }
 
 class StockOverView extends StatelessWidget {
