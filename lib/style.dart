@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 var theme = ThemeData(
   textTheme: TextTheme(bodyText2: TextStyle(fontSize: 15.0,
-      fontFamily: 'Roboto',
+      fontFamily: 'Pretendard',
       fontWeight: FontWeight.w600,
       color: Colors.black)
   ),

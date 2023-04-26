@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stock63/const/text_style.dart';
 import 'package:stock63/stock_detail.dart';
 import 'style.dart' as style;
 import 'dart:convert';
@@ -28,8 +29,9 @@ class _StockListState extends State<StockList> {
   }
 
   getData() async {
+    var gradient = widget.gradient == 1 ? 1 : -1;
     var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/list?period=${widget.period}&gradient=${widget.gradient}'));
+        'http://15.164.171.244:8000/domestic/kospi/list?period=${widget.period}&gradient=${gradient}'));
     var result2 = jsonDecode(utf8.decode(result.bodyBytes));
     setState(() {
       print(widget.period);
@@ -40,8 +42,9 @@ class _StockListState extends State<StockList> {
   }
 
   getOverseaData() async {
+    var gradientOversea = widget.gradient == 1 ? 1 : -1;
     var resultOversea = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/oversea/list?period=${widget.period}&gradient=${widget.gradient}'));
+        'http://15.164.171.244:8000/oversea/list?period=${widget.period}&gradient=$gradientOversea'));
     var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
     setState(() {
       data2 = List<dynamic>.from(resultOversea2);
@@ -52,6 +55,10 @@ class _StockListState extends State<StockList> {
   @override
   void initState() {
     super.initState();
+    DateTime currentDate = DateTime.now();
+    DateTime todayDateOnly = DateTime(currentDate.year, currentDate.month, currentDate.day);
+
+
     getData();
     getOverseaData();
     startLoading();
@@ -91,7 +98,7 @@ class _StockListState extends State<StockList> {
                   Navigator.push(
                     context,
                     MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return StockDetail(i: i + 1);
+                      return StockDetail(htsKorIsnm:data[i]['htsKorIsnm'],mkscShrnIscd: data[i]['mkscShrnIscd'],prdyCtrt:data[i]['prdyCtrt']);
                     }),
                   );
                 },
@@ -106,11 +113,7 @@ class _StockListState extends State<StockList> {
                             alignment: Alignment.center,
                             child: Text(
                               (i + 1).toString(),
-                              style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue),
+                              style: MyTextStyle.CblS20W700,
                             )),
                         Container(
                           margin: EdgeInsets.only(left: 10),
@@ -131,7 +134,7 @@ class _StockListState extends State<StockList> {
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   data[i]['htsKorIsnm'].toString(),
-                                  style: textStyle1,
+                                  style: MyTextStyle.CbS20W600,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -165,16 +168,6 @@ class _StockListState extends State<StockList> {
                             ],
                           ),
                         ),
-                        // Container(
-                        //     child: Text(
-                        //       data[i]['avlsScalClsCode'],
-                        //       style: textStyle1,
-                        //     )),
-                        // Container(
-                        //     child: Text(
-                        //       data[i]['mkscShrnIscd'].toString(),
-                        //       style: textStyle1,
-                        //     )),
                       ],
                     ),
                   ],
@@ -206,7 +199,7 @@ class _StockListState extends State<StockList> {
                   Navigator.push(
                     context,
                     MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return StockDetail(i: i + 1);
+                      return StockDetail(htsKorIsnm: data2[i]['htsKorIsnm'],mkscShrnIscd: data2[i]['mkscShrnIscd'],prdyCtrt:data2[i]['prdyCtrt']);
                     }),
                   );
                 },
@@ -221,11 +214,7 @@ class _StockListState extends State<StockList> {
                             alignment: Alignment.center,
                             child: Text(
                               (i + 1).toString(),
-                              style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.blue),
+                              style: MyTextStyle.CblS20W700
                             )),
                         Container(
                           margin: EdgeInsets.only(left: 10),
@@ -246,7 +235,7 @@ class _StockListState extends State<StockList> {
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   data2[i]['htsKorIsnm'].toString(),
-                                  style: textStyle1,
+                                  style: MyTextStyle.CbS20W700,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -263,7 +252,7 @@ class _StockListState extends State<StockList> {
                                           color: Colors.grey),
                                     ),
                                     Text(
-                                      ' ${data2[i]['totalCtrt'].toString()}%',
+                                      ' ${data2[i]['totalCtrt'].toStringAsFixed(2)}%',
                                       style: TextStyle(
                                           fontSize: 15.0,
                                           fontFamily: 'Roboto',
@@ -280,16 +269,6 @@ class _StockListState extends State<StockList> {
                             ],
                           ),
                         ),
-                        // Container(
-                        //     child: Text(
-                        //       data[i]['avlsScalClsCode'],
-                        //       style: textStyle1,
-                        //     )),
-                        // Container(
-                        //     child: Text(
-                        //   data2[i]['totalCtrt'].toString(),
-                        //   style: textStyle1,
-                        // )),
                       ],
                     ),
                   ],
@@ -344,7 +323,8 @@ class StockOverView extends StatelessWidget {
                     color: Colors.black)),
           ),
           Container(
-            child: Text("오늘 12:37 기준",
+
+            child: Text("오늘 ${DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)} 기준",
                 style: TextStyle(
                     fontSize: 15.0,
                     fontFamily: 'Roboto',
@@ -365,8 +345,3 @@ class StockOverView extends StatelessWidget {
   }
 }
 
-var textStyle1 = TextStyle(
-    fontSize: 20.0,
-    fontFamily: 'Roboto',
-    fontWeight: FontWeight.w600,
-    color: Colors.black);

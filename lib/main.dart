@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
+
     home: MyApp(),
     theme: style.theme,
   ));

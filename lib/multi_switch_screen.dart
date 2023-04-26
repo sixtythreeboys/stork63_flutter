@@ -13,21 +13,33 @@ class _MultiSwitchState extends State<MultiSwitch> {
   bool val1 = false;
   bool val2 = false;
   bool searchButtonEnabled = false;
+
   var gradient = 0;
   var period = '';
+  var marketValue = 0;
 
-  List<Widget> fruits = <Widget>[Text('하락'), Text('상승')];
-  final List<bool> _selectedFruits = <bool>[true, false];
 
-  void _onToggle(int index) {
+  final List<bool> _selectedUpdown = <bool>[true, false];
+  final List<bool> _selectedMarketValue = <bool>[true, false];
+
+  void _onToggleUpdown(int index) {
     setState(() {
       // The button that is tapped is set to true, and the others to false.
-      for (int i = 0; i < _selectedFruits.length; i++) {
-        _selectedFruits[i] = i == index;
+      for (int i = 0; i < _selectedUpdown.length; i++) {
+        _selectedUpdown[i] = i == index;
       }
       print(index);
       gradient = index;
       print(gradient);
+    });
+  }
+
+  void _onToggleMarketValue(int index) {
+    setState(() {
+      // The button that is tapped is set to true, and the others to false.
+      for (int i = 0; i < _selectedMarketValue.length; i++) {
+        _selectedMarketValue[i] = i == index;
+      }
     });
   }
 
@@ -60,7 +72,8 @@ class _MultiSwitchState extends State<MultiSwitch> {
         children: [
           customSwitch('연속 하락/상승', val1, onChangeFunction1),
           option1(),
-          customSwitch('조건 2', val2, onChangeFunction2),
+          customSwitch('시가총액', val2, onChangeFunction2),
+          option2(),
           _searchButton()
         ]);
   }
@@ -114,7 +127,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
             Text("일 연속"),
             Spacer(),
             ToggleButtons(
-              onPressed: _onToggle,
+              onPressed: _onToggleUpdown,
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               selectedBorderColor: Colors.blue[700],
               selectedColor: Colors.white,
@@ -125,8 +138,50 @@ class _MultiSwitchState extends State<MultiSwitch> {
                 minHeight: 40.0,
                 minWidth: 80.0,
               ),
-              isSelected: _selectedFruits,
-              children: fruits,
+              isSelected: _selectedUpdown,
+              children: const [Text('하락'), Text('상승')],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget option2(){
+    return Visibility(
+      visible: val2,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 22.0, left: 16.0, right: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("시가총액"),
+            SizedBox(width: 20,),
+            SizedBox(
+              width: 150.0,
+              child: TextField(
+                style:
+                TextStyle(fontSize: 20.0, height: 1.0, color: Colors.black),
+                onChanged: (text) {
+                  print(text);
+                  setState(() {
+                    period = text;
+                  });
+                },
+              ),
+            ),
+            Text("억"),
+            Spacer(),
+            ToggleButtons(
+              onPressed: _onToggleMarketValue,
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              selectedBorderColor: Colors.blue[700],
+              selectedColor: Colors.white,
+              textStyle: TextStyle(),
+              fillColor: Colors.blue[200],
+              color: Colors.blue[400],
+              isSelected: _selectedMarketValue,
+              children: [Text('이상'), Text('이하')],
             ),
           ],
         ),
