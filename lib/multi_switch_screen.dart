@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:stock63/const/text_style.dart';
 import 'package:stock63/stock_list.dart';
 
 class MultiSwitch extends StatefulWidget {
@@ -14,9 +15,9 @@ class _MultiSwitchState extends State<MultiSwitch> {
   bool val2 = false;
   bool searchButtonEnabled = false;
 
-  var gradient = 0;
   var period = '';
-  var marketValue = 0;
+
+  var avlsScal = '';
 
 
   final List<bool> _selectedUpdown = <bool>[true, false];
@@ -28,9 +29,12 @@ class _MultiSwitchState extends State<MultiSwitch> {
       for (int i = 0; i < _selectedUpdown.length; i++) {
         _selectedUpdown[i] = i == index;
       }
-      print(index);
-      gradient = index;
-      print(gradient);
+      int _period = int.parse(period);
+      if ((index == 1 && _period >0) || (index == 0 && _period < 0 )){
+        _period *= -1;
+      }
+      period = _period.toString();
+      print(period);
     });
   }
 
@@ -40,6 +44,12 @@ class _MultiSwitchState extends State<MultiSwitch> {
       for (int i = 0; i < _selectedMarketValue.length; i++) {
         _selectedMarketValue[i] = i == index;
       }
+      int _avlsScal = int.parse(avlsScal);
+      if ((index == 1 && _avlsScal >0) || (index == 0 && _avlsScal < 0 )){
+        _avlsScal *= -1;
+      }
+      avlsScal = _avlsScal.toString();
+      print(avlsScal);
     });
   }
 
@@ -85,11 +95,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(text,
-              style: const TextStyle(
-                  fontSize: 20.0,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black)),
+              style: MyTextStyle.CbS20W600),
           const Spacer(),
           CupertinoSwitch(
               trackColor: Colors.grey,
@@ -139,7 +145,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
                 minWidth: 80.0,
               ),
               isSelected: _selectedUpdown,
-              children: const [Text('하락'), Text('상승')],
+              children: const [Text('상승'), Text('하락')],
             ),
           ],
         ),
@@ -165,7 +171,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
                 onChanged: (text) {
                   print(text);
                   setState(() {
-                    period = text;
+                    avlsScal = text;
                   });
                 },
               ),
@@ -195,7 +201,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
       child: ElevatedButton(
         onPressed: searchButtonEnabled ? () {
           Navigator.push(
-              context, MaterialPageRoute(builder: (c) => StockList(gradient: gradient, period: period)));
+              context, MaterialPageRoute(builder: (c) => StockList(period: period, avlsScal: avlsScal)));
         } : null,
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {

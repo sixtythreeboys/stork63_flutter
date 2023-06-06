@@ -6,18 +6,18 @@ class MyInputDecorationTheme {
   static InputDecorationTheme defaultInputDecoration = InputDecorationTheme(
     contentPadding: const EdgeInsets.all(16),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: MyColors.gray500),
+      borderSide: BorderSide(color: MyColors.grey600),
       borderRadius: BorderRadius.circular(16),
     ),
     border: OutlineInputBorder(
-      borderSide: BorderSide(color: MyColors.gray600),
+      borderSide: BorderSide(color: MyColors.grey600),
       borderRadius: BorderRadius.circular(16),
     ),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: MyColors.gray600),
+      borderSide: BorderSide(color: MyColors.grey600),
       borderRadius: BorderRadius.circular(16),
     ),
-    hintStyle: MyTextStyle.CgS16W500,
+    hintStyle: MyTextStyle.CgS20W700,
     filled: true,
     fillColor: Colors.transparent,
   );

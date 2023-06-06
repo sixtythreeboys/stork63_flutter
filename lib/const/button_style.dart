@@ -23,15 +23,6 @@ class MyButtonStyle {
     ),
   );
 
-  static ButtonStyle roleSelectButtonDisabled = ButtonStyle(
-    shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
-      RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-        side: BorderSide(width: 1, color: MyColors.gray300),
-      ),
-    ),
-  );
-
   static ButtonStyle categoryUnselectedButton = ButtonStyle(
     shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
       RoundedRectangleBorder(
@@ -60,14 +51,6 @@ class MyButtonStyle {
     ),
   );
 
-  static ButtonStyle jobUnSelectButtonEnabled = ButtonStyle(
-    shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
-      RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-        side: BorderSide(width: 1, color: MyColors.gray300),
-      ),
-    ),
-  );
 
   static ButtonStyle jobSelectButtonEnabled = ButtonStyle(
     shape: MaterialStatePropertyAll<RoundedRectangleBorder>(

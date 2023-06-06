@@ -8,20 +8,13 @@ import 'package:http/http.dart' as http;
 void main() {
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-
     home: MyApp(),
-    theme: style.theme,
+    //theme: style.theme,
   ));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {

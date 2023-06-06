@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stock63/const/colors.dart';
 import 'package:stock63/const/text_style.dart';
 import 'package:stock63/stock_detail.dart';
 import 'style.dart' as style;
@@ -6,10 +7,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class StockList extends StatefulWidget {
-  StockList({Key? key, this.gradient, this.period}) : super(key: key);
+  StockList({Key? key, this.avlsScal, this.period}) : super(key: key);
 
-  var gradient;
   var period;
+  var avlsScal;
 
   @override
   State<StockList> createState() => _StockListState();
@@ -28,23 +29,21 @@ class _StockListState extends State<StockList> {
     });
   }
 
-  getData() async {
-    var gradient = widget.gradient == 1 ? 1 : -1;
+  void getDomesticData() async {
     var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/list?period=${widget.period}&gradient=${gradient}'));
+        'http://15.164.171.244:8000/domestic/kospi/list?period=${widget.period}&avlsScal=${widget.avlsScal}'));
     var result2 = jsonDecode(utf8.decode(result.bodyBytes));
     setState(() {
       print(widget.period);
-      print(widget.gradient);
+      print(widget.avlsScal);
       data = List<dynamic>.from(result2);
       print(data);
     });
   }
 
-  getOverseaData() async {
-    var gradientOversea = widget.gradient == 1 ? 1 : -1;
+  void getOverseaData() async {
     var resultOversea = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/oversea/list?period=${widget.period}&gradient=$gradientOversea'));
+        'http://15.164.171.244:8000/oversea/list?period=${widget.period}&avlsScal=${widget.avlsScal}'));
     var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
     setState(() {
       data2 = List<dynamic>.from(resultOversea2);
@@ -56,10 +55,10 @@ class _StockListState extends State<StockList> {
   void initState() {
     super.initState();
     DateTime currentDate = DateTime.now();
-    DateTime todayDateOnly = DateTime(currentDate.year, currentDate.month, currentDate.day);
+    DateTime todayDateOnly =
+        DateTime(currentDate.year, currentDate.month, currentDate.day);
 
-
-    getData();
+    getDomesticData();
     getOverseaData();
     startLoading();
   }
@@ -71,13 +70,21 @@ class _StockListState extends State<StockList> {
         child: Scaffold(
             appBar: AppBar(
               bottom: TabBar(
-                labelColor: Colors.black,
+                labelStyle:
+                    TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+                labelColor: MyColors.grey900,
+                unselectedLabelColor: MyColors.grey600,
                 tabs: const [Tab(text: "국내"), Tab(text: "해외")],
-                indicatorColor: Colors.black,
+                indicatorColor: MyColors.grey900,
+                indicatorSize: TabBarIndicatorSize.tab,
               ),
               backgroundColor: Colors.white,
               iconTheme: IconThemeData(color: Colors.grey),
               elevation: 0.0,
+              title: Text(
+                "STOCK63",
+                style: MyTextStyle.CgS20W700,
+              ),
             ),
             body: TabBarView(
               children: [_domestic(), _overSea()],
@@ -88,91 +95,82 @@ class _StockListState extends State<StockList> {
     if (data.isNotEmpty) {
       return CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: StockOverView(),
+          SliverToBoxAdapter(
+            child: _filter(),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate((BuildContext context, int i) {
               return ListTile(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return StockDetail(htsKorIsnm:data[i]['htsKorIsnm'],mkscShrnIscd: data[i]['mkscShrnIscd'],prdyCtrt:data[i]['prdyCtrt']);
-                    }),
-                  );
-                },
-                title: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                            width: 34,
-                            alignment: Alignment.center,
-                            child: Text(
-                              (i + 1).toString(),
-                              style: MyTextStyle.CblS20W700,
-                            )),
-                        Container(
-                          margin: EdgeInsets.only(left: 10),
-                          alignment: Alignment.centerLeft,
-                          child: CircleAvatar(
-                            radius: 20, // 반지름 크기
-                            backgroundColor: Colors.grey, // 배경색
-                            child: Icon(Icons.person,
-                                size: 30, color: Colors.white), // 프로필 아이콘
-                          ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<Widget>(builder: (BuildContext context) {
+                        return StockDetail(
+                            htsKorIsnm: data[i]['htsKorIsnm'],
+                            mkscShrnIscd: data[i]['mkscShrnIscd'],
+                            prdyCtrt: data[i]['prdyCtrt']);
+                      }),
+                    );
+                  },
+                  title: Row(
+                    children: [
+                      Container(
+                          width: 14,
+                          height: 28,
+                          alignment: Alignment.center,
+                          child: Text(
+                            (i + 1).toString(),
+                            style: MyTextStyle.CbS18W600,
+                          )),
+                      Container(
+                        margin: EdgeInsets.only(left: 20),
+                        alignment: Alignment.centerLeft,
+                        child: CircleAvatar(
+                          radius: 20, // 반지름 크기
+                          backgroundColor: Colors.grey, // 배경색
                         ),
-                        Container(
-                          width: 240,
-                          margin: EdgeInsets.only(left: 7),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  data[i]['htsKorIsnm'].toString(),
-                                  style: MyTextStyle.CbS20W600,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                      ),
+                      Container(
+                        width: 209,
+                        height: 44,
+                        margin: EdgeInsets.only(left: 20),
+                        child: Column(
+                          children: [
+                            Container(
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                data[i]['htsKorIsnm'].toString(),
+                                style: MyTextStyle.CbS18W600,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      '${data[i]['stckClpr'].toString()}원',
-                                      style: TextStyle(
-                                          fontSize: 15.0,
-                                          fontFamily: 'Roboto',
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey),
-                                    ),
-                                    Text(
-                                      ' ${data[i]['totalCtrt'].toString()}%',
-                                      style: TextStyle(
-                                          fontSize: 15.0,
-                                          fontFamily: 'Roboto',
-                                          fontWeight: FontWeight.w600,
-                                          color: data[i]['totalCtrt'] == 0
-                                              ? Colors.grey
-                                              : data[i]['totalCtrt'] > 0
-                                                  ? Colors.red
-                                                  : Colors.blue),
-                                    ),
-                                  ],
-                                ),
+                            ),
+                            Container(
+                              alignment: Alignment.bottomLeft,
+                              child: Row(
+                                children: [
+                                  Text('${data[i]['stckClpr'].toString()}원',
+                                      style: MyTextStyle.CgS14W400),
+                                  Text(
+                                    ' ${data[i]['totalCtrt'].toString()}%',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        fontFamily: 'Pretendard',
+                                        fontWeight: FontWeight.w400,
+                                        color: data[i]['totalCtrt'] == 0
+                                            ? Colors.grey
+                                            : data[i]['totalCtrt'] > 0
+                                                ? Colors.red
+                                                : Colors.blue),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
+                      ),
+                    ],
+                  ),
+                );
             }, childCount: data.length),
           ),
         ],
@@ -189,8 +187,11 @@ class _StockListState extends State<StockList> {
     if (data2.isNotEmpty) {
       return CustomScrollView(
         slivers: [
-          const SliverToBoxAdapter(
-            child: StockOverView(),
+          SliverToBoxAdapter(
+            child: Container(
+              height: 100,
+              color: Colors.red,
+            ),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate((BuildContext context, int i) {
@@ -199,7 +200,10 @@ class _StockListState extends State<StockList> {
                   Navigator.push(
                     context,
                     MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return StockDetail(htsKorIsnm: data2[i]['htsKorIsnm'],mkscShrnIscd: data2[i]['mkscShrnIscd'],prdyCtrt:data2[i]['prdyCtrt']);
+                      return StockDetail(
+                          htsKorIsnm: data2[i]['htsKorIsnm'],
+                          mkscShrnIscd: data2[i]['mkscShrnIscd'],
+                          prdyCtrt: data2[i]['prdyCtrt']);
                     }),
                   );
                 },
@@ -212,10 +216,8 @@ class _StockListState extends State<StockList> {
                         Container(
                             width: 21,
                             alignment: Alignment.center,
-                            child: Text(
-                              (i + 1).toString(),
-                              style: MyTextStyle.CblS20W700
-                            )),
+                            child: Text((i + 1).toString(),
+                                style: MyTextStyle.CblS20W700)),
                         Container(
                           margin: EdgeInsets.only(left: 10),
                           alignment: Alignment.centerLeft,
@@ -292,56 +294,20 @@ class _StockListState extends State<StockList> {
       }
     }
   }
-}
 
-class StockOverView extends StatelessWidget {
-  const StockOverView({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 22.0, left: 16.0, right: 16.0),
-      child: Column(
+  Widget _filter() {
+    return Container(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            child: Text(
-              "거래량 Top100",
-              style: TextStyle(
-                  fontSize: 30.0,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black),
-            ),
-          ),
-          Container(
-            child: Text("많이 사고 많이 팔고 있어요",
-                style: TextStyle(
-                    fontSize: 16.0,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black)),
-          ),
-          Container(
-
-            child: Text("오늘 ${DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)} 기준",
-                style: TextStyle(
-                    fontSize: 15.0,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey)),
-          ),
-          Container(
-            child: Text("거래소 지정 위험 주식 차트에서 제외되었어요",
-                style: TextStyle(
-                    fontSize: 15.0,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400,
-                    color: Colors.grey)),
-          )
+          IconButton(onPressed: () {}, icon: Icon(Icons.filter_alt)),
+          ElevatedButton(
+              onPressed: () {},
+              child: Text(
+                "시가총액순",
+              ))
         ],
       ),
     );
   }
 }
-
