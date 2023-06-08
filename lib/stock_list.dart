@@ -115,7 +115,7 @@ class _StockListState extends State<StockList> {
                   title: Row(
                     children: [
                       Container(
-                          width: 14,
+                          width: 20,
                           height: 28,
                           alignment: Alignment.center,
                           child: Text(
