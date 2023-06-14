@@ -76,4 +76,19 @@ class MyTextStyle {
     height: 1.2,
     fontFamily: 'Pretendard',
   );
+
+  static TextStyle CbS32W700 = TextStyle(
+    color: MyColors.black,
+    fontSize: 32,
+    fontWeight: FontWeight.w700,
+    height: 1.2,
+    fontFamily: 'Pretendard',
+  );
+  static TextStyle Cg900S16W600 = TextStyle(
+    color: MyColors.grey900,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    fontFamily: 'Pretendard',
+  );
 }

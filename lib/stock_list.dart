@@ -100,19 +100,22 @@ class _StockListState extends State<StockList> {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate((BuildContext context, int i) {
-              return ListTile(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                        return StockDetail(
-                            htsKorIsnm: data[i]['htsKorIsnm'],
-                            mkscShrnIscd: data[i]['mkscShrnIscd'],
-                            prdyCtrt: data[i]['prdyCtrt']);
-                      }),
-                    );
-                  },
-                  title: Row(
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
+                      return StockDetail(
+                          htsKorIsnm: data[i]['htsKorIsnm'],
+                          mkscShrnIscd: data[i]['mkscShrnIscd'],
+                          prdyCtrt: data[i]['prdyCtrt']);
+                    }),
+                  );
+                },
+                child: Container(
+                  height: 44,
+                  margin: EdgeInsets.only(left: 20, bottom: 28),
+                  child: Row(
                     children: [
                       Container(
                           width: 20,
@@ -124,19 +127,17 @@ class _StockListState extends State<StockList> {
                           )),
                       Container(
                         margin: EdgeInsets.only(left: 20),
-                        alignment: Alignment.centerLeft,
                         child: CircleAvatar(
-                          radius: 20, // 반지름 크기
-                          backgroundColor: Colors.grey, // 배경색
-                        ),
+                            backgroundColor: MyColors.grey300 // 배경색
+                            ),
                       ),
                       Container(
-                        width: 209,
-                        height: 44,
                         margin: EdgeInsets.only(left: 20),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
+                              margin: EdgeInsets.only(bottom: 5),
                               alignment: Alignment.topLeft,
                               child: Text(
                                 data[i]['htsKorIsnm'].toString(),
@@ -145,7 +146,6 @@ class _StockListState extends State<StockList> {
                               ),
                             ),
                             Container(
-                              alignment: Alignment.bottomLeft,
                               child: Row(
                                 children: [
                                   Text('${data[i]['stckClpr'].toString()}원',
@@ -170,7 +170,8 @@ class _StockListState extends State<StockList> {
                       ),
                     ],
                   ),
-                );
+                ),
+              );
             }, childCount: data.length),
           ),
         ],
@@ -296,18 +297,18 @@ class _StockListState extends State<StockList> {
   }
 
   Widget _filter() {
-    return Container(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.filter_alt)),
-          ElevatedButton(
-              onPressed: () {},
-              child: Text(
-                "시가총액순",
-              ))
-        ],
-      ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("1"),
+        IconButton(onPressed: () {}, icon: Icon(Icons.filter_alt)),
+        OutlinedButton(
+          onPressed: () {},
+          child: Text(
+            "시가총액순", style: MyTextStyle.Cg900S16W600,
+          ),
+        )
+      ],
     );
   }
 }

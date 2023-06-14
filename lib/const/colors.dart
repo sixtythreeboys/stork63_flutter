@@ -2,11 +2,20 @@ import 'package:flutter/material.dart';
 
 class MyColors {
   //black 계열
-  static Color black = Colors.black;
+  static Color black = const Color(0xff1A1E27);
 
   static Color grey900 = const Color(0xff333D4B);
   static Color grey800 = const Color(0xff4E5968);
+  static Color grey700 = const Color(0xff6B7684);
   static Color grey600 = const Color(0xff8B95A1);
+  static Color grey500 = const Color(0xffB1B8C0);
+  static Color grey400 = const Color(0xffC1C6CD);
+  static Color grey300 = const Color(0xffDBDFE3);
+  static Color grey200 = const Color(0xffEAECEE);
+
+  static Color grey150 = const Color(0xffF2F4F6);
+  static Color grey100 = const Color(0xffF7F8F9);
+
   static Color white = Colors.white;
 
   //blue 계열
