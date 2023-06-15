@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stock63/const/colors.dart';
 import 'package:stock63/const/text_style.dart';
 import 'package:stock63/stock_detail.dart';
+import 'filter_screen.dart';
 import 'style.dart' as style;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -68,6 +70,7 @@ class _StockListState extends State<StockList> {
     return DefaultTabController(
         length: 2,
         child: Scaffold(
+            backgroundColor: MyColors.white,
             appBar: AppBar(
               bottom: TabBar(
                 labelStyle:
@@ -104,12 +107,14 @@ class _StockListState extends State<StockList> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return StockDetail(
-                          htsKorIsnm: data[i]['htsKorIsnm'],
-                          mkscShrnIscd: data[i]['mkscShrnIscd'],
-                          prdyCtrt: data[i]['prdyCtrt']);
-                    }),
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation1, animation2) =>
+                          StockDetail(
+                              htsKorIsnm: data[i]['htsKorIsnm'],
+                              mkscShrnIscd: data[i]['mkscShrnIscd'],
+                              prdyCtrt: data[i]['prdyCtrt']),
+                      transitionDuration: Duration(seconds: 0),
+                    ),
                   );
                 },
                 child: Container(
@@ -118,15 +123,15 @@ class _StockListState extends State<StockList> {
                   child: Row(
                     children: [
                       Container(
-                          width: 20,
+                          width: 40,
                           height: 28,
-                          alignment: Alignment.center,
+                          alignment: Alignment.centerLeft,
                           child: Text(
                             (i + 1).toString(),
                             style: MyTextStyle.CbS18W600,
                           )),
                       Container(
-                        margin: EdgeInsets.only(left: 20),
+                        margin: EdgeInsets.only(left: 0),
                         child: CircleAvatar(
                             backgroundColor: MyColors.grey300 // 배경색
                             ),
@@ -137,6 +142,7 @@ class _StockListState extends State<StockList> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
+                              width: 268,
                               margin: EdgeInsets.only(bottom: 5),
                               alignment: Alignment.topLeft,
                               child: Text(
@@ -177,9 +183,14 @@ class _StockListState extends State<StockList> {
         ],
       );
     } else {
-      return Container(
-        alignment: Alignment.center,
-        child: CircularProgressIndicator(),
+      return Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          width: 200.0,
+          height: 200.0,
+          color: Colors.white,
+        ),
       );
     }
   }
@@ -297,16 +308,45 @@ class _StockListState extends State<StockList> {
   }
 
   Widget _filter() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
       children: [
-        Text("1"),
-        IconButton(onPressed: () {}, icon: Icon(Icons.filter_alt)),
-        OutlinedButton(
-          onPressed: () {},
-          child: Text(
-            "시가총액순", style: MyTextStyle.Cg900S16W600,
-          ),
+        SizedBox(
+          height: 24,
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              margin: EdgeInsets.only(left: 20, right: 20),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation1, animation2) =>
+                          FilterScreen(),
+                      transitionDuration: Duration(seconds: 0),
+                    ),
+                  );
+                },
+                child: Image.asset(
+                  'assets/images/icon_filter_mono.png',
+                ),
+              ),
+            ),
+            OutlinedButton(
+              onPressed: () {},
+              style: OutlinedButton.styleFrom(
+                  backgroundColor: MyColors.grey150, side: BorderSide.none),
+              child: Text(
+                "시가총액순",
+                style: MyTextStyle.Cg900S16W600,
+              ),
+            )
+          ],
+        ),
+        SizedBox(
+          height: 36,
         )
       ],
     );

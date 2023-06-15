@@ -18,21 +18,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        shadowColor: Colors.transparent,
-      ),
-      body: MultiSwitch(),
-      bottomNavigationBar: BottomNavigationBar(
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: '홈'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_bag_outlined), label: '샵')
-        ],
-      ),
-    );
+    return StockList(period: 3, avlsScal: 0);
   }
 }

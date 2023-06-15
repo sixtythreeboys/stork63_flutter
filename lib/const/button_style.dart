@@ -5,13 +5,19 @@ import 'colors.dart';
 
 class MyButtonStyle {
 
-  static ButtonStyle nextButtonStyleDisabled = ButtonStyle(
+  static ButtonStyle searchButtonStyle = ButtonStyle(
     shape: MaterialStatePropertyAll<RoundedRectangleBorder>(
       RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(6.0),
       ),
     ),
-    backgroundColor: MaterialStatePropertyAll(MyColors.blue100),
+    backgroundColor: MaterialStatePropertyAll(MyColors.grey900),
+  );
+
+
+
+  static ButtonStyle researchButtonStyle = ButtonStyle(
+    backgroundColor: MaterialStatePropertyAll(MyColors.white),
   );
 
   static ButtonStyle roleSelectButtonEnabled = ButtonStyle(

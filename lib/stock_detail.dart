@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stock63/const/colors.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:web_socket_channel/io.dart';
@@ -239,16 +240,18 @@ class _StockDetailState extends State<StockDetail> {
           _comparePreDayRatio = socketDataJson['전일대비율'].toString();
 
           stockDataDay[stockDataDay.length - 1].close =
-              double.parse(_stckPrpr!);
+              double.parse(socketDataJson['현재가']!);
 
           stockDataWeek[stockDataWeek.length - 1].close =
-              double.parse(_stckPrpr!);
+              double.parse(socketDataJson['현재가']!);
 
           stockDataMonth[stockDataMonth.length - 1].close =
-              double.parse(_stckPrpr!);
+              double.parse(socketDataJson['현재가']!);
 
           stockDataYear[stockDataYear.length - 1].close =
-              double.parse(_stckPrpr!);
+              double.parse(socketDataJson['현재가']!);
+
+          print(_stckPrpr);
         });
       } catch (e) {
         print('Error: $e');
@@ -261,17 +264,26 @@ class _StockDetailState extends State<StockDetail> {
   @override
   void dispose() {
     channel.sink.close();
+    print("소켓종료");
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (todayFinalPrice == null ) {
-      return Container(
-        alignment: Alignment.center,
-          child: CircularProgressIndicator());
+      return Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          width: 10.0,
+          height: 10.0,
+          color: Colors.white,
+        ),
+      );
     } else {
       return Scaffold(
+
+          backgroundColor: MyColors.white,
           appBar: AppBar(
             iconTheme: IconThemeData(color: Colors.grey),
             backgroundColor: Colors.white,
@@ -311,7 +323,7 @@ class _StockDetailState extends State<StockDetail> {
           SizedBox(
             height: 7,
           ),
-          _comparePreDay == null || _comparePreDayRatio == null
+          _comparePreDay == null && _comparePreDayRatio == null
               ? Text("어제보다 $todayFinalUpdown원 00%",
                   style: TextStyle(
                     color: int.parse(todayFinalUpdown!) > 0
@@ -391,22 +403,12 @@ class _StockDetailState extends State<StockDetail> {
   }
 
   Widget _graph() {
-    double paddedMin = 0;
-    double paddedMax = 0;
-
-    if (stockData.isNotEmpty) {
-      double minValue = stockData.map((e) => e.low).reduce(min); // 최소값 찾기
-      paddedMin = minValue - minValue * 0.05; // 10%의 여유를 준다
-      double maxValue = stockData.map((e) => e.high).reduce(max); // 최대값 찾기
-      paddedMax = maxValue + maxValue * 0.05; // 10%의 여유를 준다
-    }
     return SfCartesianChart(
-      primaryXAxis: DateTimeAxis(
-        dateFormat: DateFormat.yMd(), // 추가: yMd는 'Year-Month-Day' 형식을 나타냅니다.
+      primaryXAxis: DateTimeCategoryAxis(
+        dateFormat: DateFormat.yMd(),
+        majorGridLines: MajorGridLines(width: 0),
       ),
       primaryYAxis: NumericAxis(
-        minimum: paddedMin,
-        maximum: paddedMax,
       ),
       zoomPanBehavior: ZoomPanBehavior(
         enablePanning: true,
@@ -415,6 +417,7 @@ class _StockDetailState extends State<StockDetail> {
       ),
       series: <ChartSeries>[
         CandleSeries<StockData, DateTime>(
+
             dataSource: stockData,
             xValueMapper: (StockData stock, _) => stock.date,
             lowValueMapper: (StockData stock, _) => stock.low,
@@ -428,9 +431,10 @@ class _StockDetailState extends State<StockDetail> {
       trackballBehavior: TrackballBehavior(
         enable: true, // 트랙볼 기능 활성화
         tooltipSettings: InteractiveTooltip(
+
             enable: true,
             format:
-                '종가 : point.close\n시가 : point.open\n최고가 : point.high\n최저가 : point.low\n최저가 : point.date'),
+                '종가 : point.close\n시가 : point.open\n최고가 : point.high\n최저가 : point.low\n날짜 : point.date'),
       ),
     );
   }
