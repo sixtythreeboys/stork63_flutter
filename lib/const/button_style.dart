@@ -18,6 +18,7 @@ class MyButtonStyle {
 
   static ButtonStyle researchButtonStyle = ButtonStyle(
     backgroundColor: MaterialStatePropertyAll(MyColors.white),
+    elevation: MaterialStateProperty.all(0),
   );
 
   static ButtonStyle roleSelectButtonEnabled = ButtonStyle(

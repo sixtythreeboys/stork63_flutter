@@ -201,7 +201,7 @@ class _MultiSwitchState extends State<MultiSwitch> {
       child: ElevatedButton(
         onPressed: searchButtonEnabled ? () {
           Navigator.push(
-              context, MaterialPageRoute(builder: (c) => StockList(period: period, avlsScal: avlsScal)));
+              context, MaterialPageRoute(builder: (c) => StockList()));
         } : null,
         style: ButtonStyle(
           backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {

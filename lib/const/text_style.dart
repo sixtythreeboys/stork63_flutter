@@ -106,4 +106,13 @@ class MyTextStyle {
     height: 1.2,
     fontFamily: 'Pretendard',
   );
+
+  static TextStyle Cg800S16W600 = TextStyle(
+    color: MyColors.grey800,
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    fontFamily: 'Pretendard',
+  );
+
 }

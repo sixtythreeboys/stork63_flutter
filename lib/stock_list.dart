@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stock63/const/colors.dart';
+import 'package:stock63/const/filter_provider.dart';
 import 'package:stock63/const/text_style.dart';
 import 'package:stock63/stock_detail.dart';
 import 'filter_screen.dart';
 import 'style.dart' as style;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class StockList extends StatefulWidget {
-  StockList({Key? key, this.avlsScal, this.period}) : super(key: key);
-
-  var period;
-  var avlsScal;
+  StockList({Key? key}) : super(key: key);
 
   @override
   State<StockList> createState() => _StockListState();
@@ -20,7 +20,7 @@ class StockList extends StatefulWidget {
 
 class _StockListState extends State<StockList> {
   var scroll = ScrollController();
-  var data = [];
+  var domesticData = [];
   var data2 = [];
   bool isLoading = true;
 
@@ -31,21 +31,18 @@ class _StockListState extends State<StockList> {
     });
   }
 
-  void getDomesticData() async {
+  void getDomesticData(var period, var avlsScal) async {
     var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/list?period=${widget.period}&avlsScal=${widget.avlsScal}'));
+        'http://15.164.171.244:8000/domestic/kospi/list?period=${period}&avlsScal=${avlsScal}'));
     var result2 = jsonDecode(utf8.decode(result.bodyBytes));
     setState(() {
-      print(widget.period);
-      print(widget.avlsScal);
-      data = List<dynamic>.from(result2);
-      print(data);
+      domesticData = List<dynamic>.from(result2);
     });
   }
 
-  void getOverseaData() async {
+  void getOverseaData(var period, var avlsScal) async {
     var resultOversea = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/oversea/list?period=${widget.period}&avlsScal=${widget.avlsScal}'));
+        'http://15.164.171.244:8000/oversea/list?period=${period}&avlsScal=${avlsScal}'));
     var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
     setState(() {
       data2 = List<dynamic>.from(resultOversea2);
@@ -56,17 +53,12 @@ class _StockListState extends State<StockList> {
   @override
   void initState() {
     super.initState();
-    DateTime currentDate = DateTime.now();
-    DateTime todayDateOnly =
-        DateTime(currentDate.year, currentDate.month, currentDate.day);
-
-    getDomesticData();
-    getOverseaData();
     startLoading();
   }
 
   @override
   Widget build(BuildContext context) {
+    final filterProvider = context.watch<FilterProvider>();
     return DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -90,16 +82,21 @@ class _StockListState extends State<StockList> {
               ),
             ),
             body: TabBarView(
-              children: [_domestic(), _overSea()],
+              children: [
+                _domestic(filterProvider.period, filterProvider.avlsScal,
+                    filterProvider.filterAdapted),
+                _overSea()
+              ],
             )));
   }
 
-  Widget _domestic() {
-    if (data.isNotEmpty) {
+  Widget _domestic(var period, var avlsScal, var filterAdapted) {
+    getDomesticData(period, avlsScal);
+    if (domesticData.isNotEmpty) {
       return CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: _filter(),
+            child: _filter(filterAdapted),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate((BuildContext context, int i) {
@@ -110,9 +107,9 @@ class _StockListState extends State<StockList> {
                     PageRouteBuilder(
                       pageBuilder: (context, animation1, animation2) =>
                           StockDetail(
-                              htsKorIsnm: data[i]['htsKorIsnm'],
-                              mkscShrnIscd: data[i]['mkscShrnIscd'],
-                              prdyCtrt: data[i]['prdyCtrt']),
+                              htsKorIsnm: domesticData[i]['htsKorIsnm'],
+                              mkscShrnIscd: domesticData[i]['mkscShrnIscd'],
+                              prdyCtrt: domesticData[i]['prdyCtrt']),
                       transitionDuration: Duration(seconds: 0),
                     ),
                   );
@@ -146,7 +143,7 @@ class _StockListState extends State<StockList> {
                               margin: EdgeInsets.only(bottom: 5),
                               alignment: Alignment.topLeft,
                               child: Text(
-                                data[i]['htsKorIsnm'].toString(),
+                                domesticData[i]['htsKorIsnm'].toString(),
                                 style: MyTextStyle.CbS18W600,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -154,17 +151,18 @@ class _StockListState extends State<StockList> {
                             Container(
                               child: Row(
                                 children: [
-                                  Text('${data[i]['stckClpr'].toString()}원',
+                                  Text(
+                                      '${domesticData[i]['stckClpr'].toString()}원',
                                       style: MyTextStyle.CgS14W400),
                                   Text(
-                                    ' ${data[i]['totalCtrt'].toString()}%',
+                                    ' ${domesticData[i]['totalCtrt'].toString()}%',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         fontFamily: 'Pretendard',
                                         fontWeight: FontWeight.w400,
-                                        color: data[i]['totalCtrt'] == 0
+                                        color: domesticData[i]['totalCtrt'] == 0
                                             ? Colors.grey
-                                            : data[i]['totalCtrt'] > 0
+                                            : domesticData[i]['totalCtrt'] > 0
                                                 ? Colors.red
                                                 : Colors.blue),
                                   ),
@@ -178,7 +176,7 @@ class _StockListState extends State<StockList> {
                   ),
                 ),
               );
-            }, childCount: data.length),
+            }, childCount: domesticData.length),
           ),
         ],
       );
@@ -307,18 +305,19 @@ class _StockListState extends State<StockList> {
     }
   }
 
-  Widget _filter() {
+  Widget _filter(var filterAdapted) {
     return Column(
       children: [
         SizedBox(
           height: 24,
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              margin: EdgeInsets.only(left: 20, right: 20),
-              child: GestureDetector(
+        Container(
+          margin: EdgeInsets.only(left: 20, right: 20),
+          height: 60.0, // 리스트뷰의 높이를 지정합니다.
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -333,17 +332,45 @@ class _StockListState extends State<StockList> {
                   'assets/images/icon_filter_mono.png',
                 ),
               ),
-            ),
-            OutlinedButton(
-              onPressed: () {},
-              style: OutlinedButton.styleFrom(
-                  backgroundColor: MyColors.grey150, side: BorderSide.none),
-              child: Text(
-                "시가총액순",
-                style: MyTextStyle.Cg900S16W600,
+              SizedBox(
+                width: 10, // 아이콘과 리스트 사이에 간격을 주기 위해 사용합니다.
               ),
-            )
-          ],
+              Expanded(
+                // Expanded를 이곳으로 옮겨주었습니다.
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: filterAdapted.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Container(
+                      margin: EdgeInsets.all(12.0), // 세트 간 간격을 위해 마진을 추가합니다.
+                      padding: EdgeInsets.only(left: 12,),
+                      decoration: BoxDecoration(
+                        color: MyColors.grey150, // 배경색을 설정합니다.
+                        borderRadius: BorderRadius.circular(5.0), // 선택적으로 모서리를 둥글게 만듭니다.
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          Text(
+                            filterAdapted[index],
+                            style: MyTextStyle.Cg800S16W600,
+                          ),
+                          IconButton(
+                            color: MyColors.grey500,
+                            icon: Icon(Icons.close),
+                            onPressed: () {
+                              setState(() {
+                                filterAdapted.removeAt(index);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              )
+            ],
+          ),
         ),
         SizedBox(
           height: 36,
