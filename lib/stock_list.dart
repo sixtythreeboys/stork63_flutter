@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stock63/const/colors.dart';
 import 'package:stock63/const/filter_provider.dart';
 import 'package:stock63/const/text_style.dart';
 import 'package:stock63/stock_detail.dart';
+import 'const/stock_list_provider.dart';
 import 'filter_screen.dart';
 import 'style.dart' as style;
 import 'dart:convert';
@@ -21,19 +23,11 @@ class StockList extends StatefulWidget {
 class _StockListState extends State<StockList> {
   var scroll = ScrollController();
   var domesticData = [];
-  var data2 = [];
-  bool isLoading = true;
-
-  void startLoading() async {
-    await Future.delayed(Duration(seconds: 5));
-    setState(() {
-      isLoading = false;
-    });
-  }
+  var overseaData = [];
 
   void getDomesticData(var period, var avlsScal) async {
     var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/list?period=${period}&avlsScal=${avlsScal}'));
+        'http://15.164.171.244:8000/domestic/kospi/list?period=$period&avlsScal=$avlsScal'));
     var result2 = jsonDecode(utf8.decode(result.bodyBytes));
     setState(() {
       domesticData = List<dynamic>.from(result2);
@@ -45,15 +39,25 @@ class _StockListState extends State<StockList> {
         'http://15.164.171.244:8000/oversea/list?period=${period}&avlsScal=${avlsScal}'));
     var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
     setState(() {
-      data2 = List<dynamic>.from(resultOversea2);
-      print(data2);
+      overseaData = List<dynamic>.from(resultOversea2);
     });
+  }
+
+  Future<void> printAllPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Use the .getKeys() method to get all keys
+    Set<String> keys = prefs.getKeys();
+
+    // Iterate over all keys and print them with their values
+    for (String key in keys) {
+      print('key: $key, value: ${prefs.get(key)}');
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    startLoading();
   }
 
   @override
@@ -63,6 +67,7 @@ class _StockListState extends State<StockList> {
         length: 2,
         child: Scaffold(
             backgroundColor: MyColors.white,
+
             appBar: AppBar(
               bottom: TabBar(
                 labelStyle:
@@ -85,7 +90,8 @@ class _StockListState extends State<StockList> {
               children: [
                 _domestic(filterProvider.period, filterProvider.avlsScal,
                     filterProvider.filterAdapted),
-                _overSea()
+                _overSea(filterProvider.period, filterProvider.avlsScal,
+                    filterProvider.filterAdapted)
               ],
             )));
   }
@@ -107,6 +113,7 @@ class _StockListState extends State<StockList> {
                     PageRouteBuilder(
                       pageBuilder: (context, animation1, animation2) =>
                           StockDetail(
+                              division: 0,
                               htsKorIsnm: domesticData[i]['htsKorIsnm'],
                               mkscShrnIscd: domesticData[i]['mkscShrnIscd'],
                               prdyCtrt: domesticData[i]['prdyCtrt']),
@@ -193,119 +200,113 @@ class _StockListState extends State<StockList> {
     }
   }
 
-  Widget _overSea() {
-    if (data2.isNotEmpty) {
+  Widget _overSea(var period, var avlsScal, var filterAdapted) {
+    getOverseaData(period, avlsScal);
+    if (overseaData.isNotEmpty) {
       return CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
-            child: Container(
-              height: 100,
-              color: Colors.red,
-            ),
+            child: _filter(filterAdapted),
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate((BuildContext context, int i) {
-              return ListTile(
+              return InkWell(
                 onTap: () {
+                  printAllPreferences();
                   Navigator.push(
                     context,
-                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
-                      return StockDetail(
-                          htsKorIsnm: data2[i]['htsKorIsnm'],
-                          mkscShrnIscd: data2[i]['mkscShrnIscd'],
-                          prdyCtrt: data2[i]['prdyCtrt']);
-                    }),
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation1, animation2) =>
+                          StockDetail(
+                              division: 1,
+                              htsKorIsnm: overseaData[i]['htsKorIsnm'],
+                              mkscShrnIscd: overseaData[i]['mkscShrnIscd'],
+                              prdyCtrt: overseaData[i]['prdyCtrt']),
+                      transitionDuration: Duration(seconds: 0),
+                    ),
                   );
                 },
-                title: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                            width: 21,
-                            alignment: Alignment.center,
-                            child: Text((i + 1).toString(),
-                                style: MyTextStyle.CblS20W700)),
-                        Container(
-                          margin: EdgeInsets.only(left: 10),
+                child: Container(
+                  height: 44,
+                  margin: EdgeInsets.only(left: 20, bottom: 28),
+                  child: Row(
+                    children: [
+                      Container(
+                          width: 40,
+                          height: 28,
                           alignment: Alignment.centerLeft,
-                          child: CircleAvatar(
-                            radius: 20, // 반지름 크기
-                            backgroundColor: Colors.grey, // 배경색
-                            child: Icon(Icons.person,
-                                size: 30, color: Colors.white), // 프로필 아이콘
-                          ),
-                        ),
-                        Container(
-                          width: 240,
-                          margin: EdgeInsets.only(left: 7),
-                          child: Column(
-                            children: [
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  data2[i]['htsKorIsnm'].toString(),
-                                  style: MyTextStyle.CbS20W700,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                          child: Text(
+                            (i + 1).toString(),
+                            style: MyTextStyle.CbS18W600,
+                          )),
+                      Container(
+                        margin: EdgeInsets.only(left: 0),
+                        child: CircleAvatar(
+                            backgroundColor: MyColors.grey300 // 배경색
+                            ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 268,
+                              margin: EdgeInsets.only(bottom: 5),
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                overseaData[i]['htsKorIsnm'].toString(),
+                                style: MyTextStyle.CbS18W600,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              Container(
-                                alignment: Alignment.centerLeft,
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      '${data2[i]['stckClpr'].toString()}달러',
-                                      style: TextStyle(
-                                          fontSize: 15.0,
-                                          fontFamily: 'Roboto',
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.grey),
-                                    ),
-                                    Text(
-                                      ' ${data2[i]['totalCtrt'].toStringAsFixed(2)}%',
-                                      style: TextStyle(
-                                          fontSize: 15.0,
-                                          fontFamily: 'Roboto',
-                                          fontWeight: FontWeight.w600,
-                                          color: data2[i]['totalCtrt'] == 0
-                                              ? Colors.grey
-                                              : data2[i]['totalCtrt'] > 0
-                                                  ? Colors.red
-                                                  : Colors.blue),
-                                    ),
-                                  ],
-                                ),
+                            ),
+                            Container(
+                              child: Row(
+                                children: [
+                                  Text(
+                                      '${overseaData[i]['stckClpr'].toString()}원',
+                                      style: MyTextStyle.CgS14W400),
+                                  Text(
+                                    ' ${overseaData[i]['totalCtrt'].toString()}%',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        fontFamily: 'Pretendard',
+                                        fontWeight: FontWeight.w400,
+                                        color: overseaData[i]['totalCtrt'] == 0
+                                            ? Colors.grey
+                                            : overseaData[i]['totalCtrt'] > 0
+                                                ? Colors.red
+                                                : Colors.blue),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               );
-            }, childCount: data2.length),
+            }, childCount: overseaData.length),
           ),
         ],
       );
     } else {
-      if (isLoading) {
-        return Container(
-          alignment: Alignment.center,
-          child: CircularProgressIndicator(),
-        );
-      } else {
-        return Container(
-          alignment: Alignment.center,
-          child: Text("데이터가 없거나 인터넷이 불안정합니다."),
-        );
-      }
+      return Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          width: 200.0,
+          height: 200.0,
+          color: Colors.white,
+        ),
+      );
     }
   }
 
   Widget _filter(var filterAdapted) {
+    var filterProvider = context.read<FilterProvider>();
     return Column(
       children: [
         SizedBox(
@@ -343,10 +344,13 @@ class _StockListState extends State<StockList> {
                   itemBuilder: (BuildContext context, int index) {
                     return Container(
                       margin: EdgeInsets.all(12.0), // 세트 간 간격을 위해 마진을 추가합니다.
-                      padding: EdgeInsets.only(left: 12,),
+                      padding: EdgeInsets.only(
+                        left: 12,
+                      ),
                       decoration: BoxDecoration(
                         color: MyColors.grey150, // 배경색을 설정합니다.
-                        borderRadius: BorderRadius.circular(5.0), // 선택적으로 모서리를 둥글게 만듭니다.
+                        borderRadius:
+                            BorderRadius.circular(5.0), // 선택적으로 모서리를 둥글게 만듭니다.
                       ),
                       child: Row(
                         children: <Widget>[
@@ -354,15 +358,18 @@ class _StockListState extends State<StockList> {
                             filterAdapted[index],
                             style: MyTextStyle.Cg800S16W600,
                           ),
-                          IconButton(
-                            color: MyColors.grey500,
-                            icon: Icon(Icons.close),
-                            onPressed: () {
-                              setState(() {
-                                filterAdapted.removeAt(index);
-                              });
-                            },
-                          ),
+                          if (filterAdapted[index] != '시가총액순')
+                            IconButton(
+                              color: MyColors.grey500,
+                              icon: Icon(Icons.close),
+                              onPressed: () async {
+                                filterProvider
+                                    .deleteFilterAdapted(filterAdapted[index]);
+                                filterProvider.setPeriod(0);
+                                SharedPreferences prefs = await SharedPreferences.getInstance();
+                                prefs.setInt("period", 0);
+                              },
+                            ),
                         ],
                       ),
                     );

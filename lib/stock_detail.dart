@@ -29,9 +29,15 @@ class StockData {
 }
 
 class StockDetail extends StatefulWidget {
-  StockDetail({Key? key, this.htsKorIsnm, this.mkscShrnIscd, this.prdyCtrt})
+  StockDetail(
+      {Key? key,
+      this.division,
+      this.htsKorIsnm,
+      this.mkscShrnIscd,
+      this.prdyCtrt})
       : super(key: key);
 
+  var division;
   var mkscShrnIscd; //종목코드
   var htsKorIsnm; //
   var prdyCtrt;
@@ -63,14 +69,23 @@ class _StockDetailState extends State<StockDetail> {
   Map<String, dynamic> socketDataJson = {};
 
   void getLastDataDay() async {
-    var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=D'));
-    var result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    var result2 = [];
+    if (widget.division == 0) {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=D'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    } else {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/oversea/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=D'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    }
 
     setState(() {
       lastData = List<dynamic>.from(result2);
 
-      todayFinalPrice = NumberFormat("#,###").format(int.parse(lastData[0]['stckClpr'])).toString();
+      todayFinalPrice = NumberFormat("#,###")
+          .format(int.parse(lastData[0]['stckClpr']))
+          .toString();
       todayFinalUpdown = lastData[0]['prdyVrss'];
       print(lastData);
       for (int i = lastData.length - 1; i > -1; i--) {
@@ -93,10 +108,16 @@ class _StockDetailState extends State<StockDetail> {
   }
 
   void getLastDataWeek() async {
-    var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=W'));
-    var result2 = jsonDecode(utf8.decode(result.bodyBytes));
-
+    var result2 = [];
+    if (widget.division == 0) {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=W'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    } else {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/oversea/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=W'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    }
     setState(() {
       lastData = List<dynamic>.from(result2);
       print(lastData);
@@ -234,7 +255,9 @@ class _StockDetailState extends State<StockDetail> {
         setState(() {
           _message = data;
           Map<String, dynamic> socketDataJson = jsonDecode(_message);
-          _stckPrpr = NumberFormat("#,###").format(int.parse(socketDataJson['현재가'])).toString();
+          _stckPrpr = NumberFormat("#,###")
+              .format(int.parse(socketDataJson['현재가']))
+              .toString();
           _comparePreDay = socketDataJson['전일대비'].toString();
 
           _comparePreDayRatio = socketDataJson['전일대비율'].toString();
@@ -270,43 +293,50 @@ class _StockDetailState extends State<StockDetail> {
 
   @override
   Widget build(BuildContext context) {
-    if (todayFinalPrice == null ) {
-      return Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Container(
-          width: 10.0,
-          height: 10.0,
-          color: Colors.white,
-        ),
-      );
-    } else {
-      return Scaffold(
+    return Scaffold(
+      backgroundColor: MyColors.white,
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.grey),
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+      ),
+      body: todayFinalPrice == null ? _buildShimmer() : _buildBodyContent(),
+    );
+  }
 
-          backgroundColor: MyColors.white,
-          appBar: AppBar(
-            iconTheme: IconThemeData(color: Colors.grey),
-            backgroundColor: Colors.white,
-            elevation: 0.0,
-          ),
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _stockName(),
-              SizedBox(
-                height: 30,
-              ),
-              _dateButton(),
-              _graph(),
-            ],
-          ));
-    }
+  Widget _buildShimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        width: 10.0,
+        height: 10.0,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildBodyContent() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _stockName(),
+        SizedBox(
+          height: 30,
+        ),
+        _dateButton(),
+        _graph(),
+      ],
+    );
   }
 
   Widget _stockName() {
     return Container(
-      padding: EdgeInsets.only(left : 20, top : 22,),
+      padding: EdgeInsets.only(
+        left: 20,
+        top: 22,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,7 +345,9 @@ class _StockDetailState extends State<StockDetail> {
             widget.htsKorIsnm,
             style: MyTextStyle.CbS20W700,
           ),
-          SizedBox(height: 4,),
+          SizedBox(
+            height: 4,
+          ),
           Text(
             _stckPrpr == null ? '$todayFinalPrice원' : '$_stckPrpr원',
             style: MyTextStyle.CbS32W700,
@@ -408,8 +440,7 @@ class _StockDetailState extends State<StockDetail> {
         dateFormat: DateFormat.yMd(),
         majorGridLines: MajorGridLines(width: 0),
       ),
-      primaryYAxis: NumericAxis(
-      ),
+      primaryYAxis: NumericAxis(),
       zoomPanBehavior: ZoomPanBehavior(
         enablePanning: true,
         enablePinching: true,
@@ -417,7 +448,6 @@ class _StockDetailState extends State<StockDetail> {
       ),
       series: <ChartSeries>[
         CandleSeries<StockData, DateTime>(
-
             dataSource: stockData,
             xValueMapper: (StockData stock, _) => stock.date,
             lowValueMapper: (StockData stock, _) => stock.low,
@@ -431,7 +461,6 @@ class _StockDetailState extends State<StockDetail> {
       trackballBehavior: TrackballBehavior(
         enable: true, // 트랙볼 기능 활성화
         tooltipSettings: InteractiveTooltip(
-
             enable: true,
             format:
                 '종가 : point.close\n시가 : point.open\n최고가 : point.high\n최저가 : point.low\n날짜 : point.date'),

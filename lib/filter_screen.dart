@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stock63/const/button_style.dart';
 import 'package:stock63/const/colors.dart';
 import 'package:stock63/const/text_style.dart';
@@ -17,9 +18,21 @@ class FilterScreen extends StatefulWidget {
 }
 
 class _FilterScreenState extends State<FilterScreen> {
+  Future<void> printAllPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Use the .getKeys() method to get all keys
+    Set<String> keys = prefs.getKeys();
+
+    // Iterate over all keys and print them with their values
+    for (String key in keys) {
+      print('key: $key, value: ${prefs.get(key)}');
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final filterProvider = context.watch<FilterProvider>();
+
     return Scaffold(
         backgroundColor: MyColors.white,
         appBar: AppBar(
@@ -85,7 +98,11 @@ class _FilterScreenState extends State<FilterScreen> {
           children: [
             SizedBox(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () async{
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  prefs.setInt('tempPeriod', 0);
+                  printAllPreferences();
+                },
                 child: Row(
                   children: [
                     ImageIcon(
@@ -105,10 +122,17 @@ class _FilterScreenState extends State<FilterScreen> {
               ),
             ),
             SizedBox(
-              width: 199,
-              height: 53,
               child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () async{
+                    var filterProvider = context.read<FilterProvider>();
+                    filterProvider.setPeriod(filterProvider.tempPeriod);
+                    if (filterProvider.tempPeriod != 0) {
+                      filterProvider.setFilterAdapted('연속 상승/하락');
+                    }
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    await prefs.setInt('period', filterProvider.tempPeriod);
+                    Navigator.pop(context);
+                  },
                   child: Text('조회하기', style: MyTextStyle.CwS18W600),
                   style: MyButtonStyle.searchButtonStyle),
             ),
