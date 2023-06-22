@@ -76,7 +76,7 @@ class _StockDetailState extends State<StockDetail> {
       result2 = jsonDecode(utf8.decode(result.bodyBytes));
     } else {
       var result = await http.get(Uri.parse(
-          'http://15.164.171.244:8000/oversea/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=D'));
+          'http://15.164.171.244:8000/oversea/price-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=D'));
       result2 = jsonDecode(utf8.decode(result.bodyBytes));
     }
 
@@ -115,7 +115,7 @@ class _StockDetailState extends State<StockDetail> {
       result2 = jsonDecode(utf8.decode(result.bodyBytes));
     } else {
       var result = await http.get(Uri.parse(
-          'http://15.164.171.244:8000/oversea/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=W'));
+          'http://15.164.171.244:8000/oversea/price-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=W'));
       result2 = jsonDecode(utf8.decode(result.bodyBytes));
     }
     setState(() {

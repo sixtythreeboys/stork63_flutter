@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stock63/avlsScalScreen.dart';
 import 'package:stock63/const/button_style.dart';
 import 'package:stock63/const/colors.dart';
 import 'package:stock63/const/text_style.dart';
@@ -59,6 +60,14 @@ class _FilterScreenState extends State<FilterScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (c) => PeriodScreen(index: index),
+                ),
+              );
+            }
+            if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (c) => AvlsScalScreen(index: index),
                 ),
               );
             }
@@ -126,11 +135,16 @@ class _FilterScreenState extends State<FilterScreen> {
                   onPressed: () async{
                     var filterProvider = context.read<FilterProvider>();
                     filterProvider.setPeriod(filterProvider.tempPeriod);
-                    if (filterProvider.tempPeriod != 0) {
+                    if (filterProvider.tempPeriod != 0 && !filterProvider.getFilterAdapted().contains('연속 상승/하락')) {
                       filterProvider.setFilterAdapted('연속 상승/하락');
                     }
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                    await prefs.setInt('period', filterProvider.tempPeriod);
+                    filterProvider.setAvlsScal(filterProvider.tempAvlsScal);
+                    if (filterProvider.tempAvlsScal != 0 && !filterProvider.getFilterAdapted().contains('시가총액')) {
+                      filterProvider.setFilterAdapted('시가총액');
+                    }
+
+                    filterProvider.getDomesticData(filterProvider.period,filterProvider.avlsScal);
+                    filterProvider.getOverseaData(filterProvider.period,filterProvider.avlsScal);
                     Navigator.pop(context);
                   },
                   child: Text('조회하기', style: MyTextStyle.CwS18W600),

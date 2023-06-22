@@ -8,7 +8,6 @@ import 'package:stock63/const/text_style.dart';
 import 'package:stock63/stock_detail.dart';
 import 'const/stock_list_provider.dart';
 import 'filter_screen.dart';
-import 'style.dart' as style;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -22,26 +21,7 @@ class StockList extends StatefulWidget {
 
 class _StockListState extends State<StockList> {
   var scroll = ScrollController();
-  var domesticData = [];
-  var overseaData = [];
 
-  void getDomesticData(var period, var avlsScal) async {
-    var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/list?period=$period&avlsScal=$avlsScal'));
-    var result2 = jsonDecode(utf8.decode(result.bodyBytes));
-    setState(() {
-      domesticData = List<dynamic>.from(result2);
-    });
-  }
-
-  void getOverseaData(var period, var avlsScal) async {
-    var resultOversea = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/oversea/list?period=${period}&avlsScal=${avlsScal}'));
-    var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
-    setState(() {
-      overseaData = List<dynamic>.from(resultOversea2);
-    });
-  }
 
   Future<void> printAllPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -55,49 +35,63 @@ class _StockListState extends State<StockList> {
     }
   }
 
+  Future<void> clear() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+  }
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      loadData();
+    });
+  }
+
+  void loadData() async {
+    final filterProvider = context.read<FilterProvider>();
+    filterProvider.getDomesticData(0, 0);
+    filterProvider.getOverseaData(0, 0);
+    printAllPreferences();
   }
 
   @override
   Widget build(BuildContext context) {
     final filterProvider = context.watch<FilterProvider>();
     return DefaultTabController(
-        length: 2,
-        child: Scaffold(
-            backgroundColor: MyColors.white,
-
-            appBar: AppBar(
-              bottom: TabBar(
-                labelStyle:
-                    TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-                labelColor: MyColors.grey900,
-                unselectedLabelColor: MyColors.grey600,
-                tabs: const [Tab(text: "국내"), Tab(text: "해외")],
-                indicatorColor: MyColors.grey900,
-                indicatorSize: TabBarIndicatorSize.tab,
-              ),
-              backgroundColor: Colors.white,
-              iconTheme: IconThemeData(color: Colors.grey),
-              elevation: 0.0,
-              title: Text(
-                "STOCK63",
-                style: MyTextStyle.CgS20W700,
-              ),
-            ),
-            body: TabBarView(
-              children: [
-                _domestic(filterProvider.period, filterProvider.avlsScal,
-                    filterProvider.filterAdapted),
-                _overSea(filterProvider.period, filterProvider.avlsScal,
-                    filterProvider.filterAdapted)
-              ],
-            )));
+      length: 2,
+      child: Scaffold(
+        backgroundColor: MyColors.white,
+        appBar: AppBar(
+          bottom: TabBar(
+            labelStyle: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
+            labelColor: MyColors.grey900,
+            unselectedLabelColor: MyColors.grey600,
+            tabs: const [Tab(text: "국내"), Tab(text: "해외")],
+            indicatorColor: MyColors.grey900,
+            indicatorSize: TabBarIndicatorSize.tab,
+          ),
+          backgroundColor: Colors.white,
+          iconTheme: IconThemeData(color: Colors.grey),
+          elevation: 0.0,
+          title: Text(
+            "STOCK63",
+            style: MyTextStyle.CgS20W700,
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _domestic(filterProvider.domesticData,
+                filterProvider.filterAdapted),
+            _overSea(filterProvider.overseaData,
+                filterProvider.filterAdapted)
+          ],
+        ),
+      ),
+    );
   }
 
-  Widget _domestic(var period, var avlsScal, var filterAdapted) {
-    getDomesticData(period, avlsScal);
+  Widget _domestic(var domesticData, var filterAdapted) {
     if (domesticData.isNotEmpty) {
       return CustomScrollView(
         slivers: [
@@ -200,8 +194,7 @@ class _StockListState extends State<StockList> {
     }
   }
 
-  Widget _overSea(var period, var avlsScal, var filterAdapted) {
-    getOverseaData(period, avlsScal);
+  Widget _overSea(var overseaData, var filterAdapted) {
     if (overseaData.isNotEmpty) {
       return CustomScrollView(
         slivers: [
@@ -363,11 +356,34 @@ class _StockListState extends State<StockList> {
                               color: MyColors.grey500,
                               icon: Icon(Icons.close),
                               onPressed: () async {
+                                if (filterAdapted[index] == '연속 상승/하락') {
+                                  filterProvider.setPeriod(0);
+                                  SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                                  prefs.setInt("period", 0);
+                                  prefs.setInt("tempPeriod", 0);
+
+                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
+                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
+                                  filterProvider.getDomesticData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+
+                                  filterProvider.getOverseaData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+                                }
+                                if(filterAdapted[index] == '시가총액'){
+                                  filterProvider.setAvlsScal(0);
+                                  SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                                  prefs.setInt("avlsScal", 0);
+                                  prefs.setInt("tempAvlsScal", 0);
+                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
+                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
+                                  filterProvider.getDomesticData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+
+                                  filterProvider.getOverseaData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+                                }
+
                                 filterProvider
                                     .deleteFilterAdapted(filterAdapted[index]);
-                                filterProvider.setPeriod(0);
-                                SharedPreferences prefs = await SharedPreferences.getInstance();
-                                prefs.setInt("period", 0);
                               },
                             ),
                         ],
