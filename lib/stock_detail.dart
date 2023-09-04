@@ -137,28 +137,34 @@ class _StockDetailState extends State<StockDetail> {
             close: double.parse(lastData[i]['stckClpr']),
             volume: int.parse(lastData[i]['acmlVol'])));
       }
-
-      DateTime now = DateTime.now();
-      DateTime dateWithNoTime = DateTime(now.year, now.month, now.day);
-
-      stockDataWeek.insert(
-          0,
-          StockData(
-              date: dateWithNoTime,
-              open: double.parse(lastData[0]['stckOprc']),
-              high: double.parse(lastData[0]['stckHgpr']),
-              low: double.parse(lastData[0]['stckLwpr']),
-              close: double.parse(lastData[0]['stckClpr']),
-              volume: int.parse(lastData[0]['acmlVol'])));
-      print(stockDataWeek);
+      //
+      // DateTime now = DateTime.now();
+      // DateTime dateWithNoTime = DateTime(now.year, now.month, now.day);
+      //
+      // stockDataWeek.insert(
+      //     0,
+      //     StockData(
+      //         date: dateWithNoTime,
+      //         open: double.parse(lastData[0]['stckOprc']),
+      //         high: double.parse(lastData[0]['stckHgpr']),
+      //         low: double.parse(lastData[0]['stckLwpr']),
+      //         close: double.parse(lastData[0]['stckClpr']),
+      //         volume: int.parse(lastData[0]['acmlVol'])));
+      // print(stockDataWeek);
     });
   }
 
   void getLastDataMonth() async {
-    var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=M'));
-    var result2 = jsonDecode(utf8.decode(result.bodyBytes));
-
+    var result2 = [];
+    if (widget.division == 0) {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=M'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    } else {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/oversea/price-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=M'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    }
     setState(() {
       lastData = List<dynamic>.from(result2);
       print(lastData);
@@ -178,28 +184,34 @@ class _StockDetailState extends State<StockDetail> {
             close: double.parse(lastData[i]['stckClpr']),
             volume: int.parse(lastData[i]['acmlVol'])));
       }
-
-      DateTime now = DateTime.now();
-      DateTime dateWithNoTime = DateTime(now.year, now.month, now.day);
-
-      stockDataMonth.insert(
-          0,
-          StockData(
-              date: dateWithNoTime,
-              open: double.parse(lastData[0]['stckOprc']),
-              high: double.parse(lastData[0]['stckHgpr']),
-              low: double.parse(lastData[0]['stckLwpr']),
-              close: double.parse(lastData[0]['stckClpr']),
-              volume: int.parse(lastData[0]['acmlVol'])));
-      print(stockDataMonth);
+      //
+      // DateTime now = DateTime.now();
+      // DateTime dateWithNoTime = DateTime(now.year, now.month, now.day);
+      //
+      // stockDataMonth.insert(
+      //     0,
+      //     StockData(
+      //         date: dateWithNoTime,
+      //         open: double.parse(lastData[0]['stckOprc']),
+      //         high: double.parse(lastData[0]['stckHgpr']),
+      //         low: double.parse(lastData[0]['stckLwpr']),
+      //         close: double.parse(lastData[0]['stckClpr']),
+      //         volume: int.parse(lastData[0]['acmlVol'])));
+      // print(stockDataMonth);
     });
   }
 
   void getLastDataYear() async {
-    var result = await http.get(Uri.parse(
-        'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=Y'));
-    var result2 = jsonDecode(utf8.decode(result.bodyBytes));
-
+    var result2 = [];
+    if (widget.division == 0) {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/domestic/kospi/pirce-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=Y'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    } else {
+      var result = await http.get(Uri.parse(
+          'http://15.164.171.244:8000/oversea/price-by-period?종목코드=${widget.mkscShrnIscd}&기간분류코드=Y'));
+      result2 = jsonDecode(utf8.decode(result.bodyBytes));
+    }
     setState(() {
       lastData = List<dynamic>.from(result2);
       print(lastData);
@@ -219,22 +231,23 @@ class _StockDetailState extends State<StockDetail> {
             close: double.parse(lastData[i]['stckClpr']),
             volume: int.parse(lastData[i]['acmlVol'])));
       }
-
-      DateTime now = DateTime.now();
-      DateTime dateWithNoTime = DateTime(now.year, now.month, now.day);
-
-      stockDataYear.insert(
-          0,
-          StockData(
-              date: dateWithNoTime,
-              open: double.parse(lastData[0]['stckOprc']),
-              high: double.parse(lastData[0]['stckHgpr']),
-              low: double.parse(lastData[0]['stckLwpr']),
-              close: double.parse(lastData[0]['stckClpr']),
-              volume: int.parse(lastData[0]['acmlVol'])));
-      print(stockDataYear);
+      //
+      // DateTime now = DateTime.now();
+      // DateTime dateWithNoTime = DateTime(now.year, now.month, now.day);
+      //
+      // stockDataYear.insert(
+      //     0,
+      //     StockData(
+      //         date: dateWithNoTime,
+      //         open: double.parse(lastData[0]['stckOprc']),
+      //         high: double.parse(lastData[0]['stckHgpr']),
+      //         low: double.parse(lastData[0]['stckLwpr']),
+      //         close: double.parse(lastData[0]['stckClpr']),
+      //         volume: int.parse(lastData[0]['acmlVol'])));
+      // print(stockDataYear);
     });
   }
+
 
   final channel = IOWebSocketChannel.connect(
     Uri.parse('ws://15.164.171.244:8000/domestic/kospi/realtime'),

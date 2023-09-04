@@ -11,6 +11,7 @@ import 'filter_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class StockList extends StatefulWidget {
   StockList({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class StockList extends StatefulWidget {
 
 class _StockListState extends State<StockList> {
   var scroll = ScrollController();
-
+  final formatCurrency = NumberFormat.simpleCurrency(locale: 'ko_KR');
 
   Future<void> printAllPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -52,6 +53,7 @@ class _StockListState extends State<StockList> {
     final filterProvider = context.read<FilterProvider>();
     filterProvider.getDomesticData(0, 0);
     filterProvider.getOverseaData(0, 0);
+    print("stock_list loadData 실행");
     printAllPreferences();
   }
 
@@ -78,13 +80,13 @@ class _StockListState extends State<StockList> {
             "STOCK63",
             style: MyTextStyle.CgS20W700,
           ),
+          centerTitle: true,
         ),
         body: TabBarView(
           children: [
-            _domestic(filterProvider.domesticData,
-                filterProvider.filterAdapted),
-            _overSea(filterProvider.overseaData,
-                filterProvider.filterAdapted)
+            _domestic(
+                filterProvider.domesticData, filterProvider.filterAdapted),
+            _overSea(filterProvider.overseaData, filterProvider.filterAdapted)
           ],
         ),
       ),
@@ -92,6 +94,7 @@ class _StockListState extends State<StockList> {
   }
 
   Widget _domestic(var domesticData, var filterAdapted) {
+    final filterProvider = context.read<FilterProvider>();
     if (domesticData.isNotEmpty) {
       return CustomScrollView(
         slivers: [
@@ -116,13 +119,11 @@ class _StockListState extends State<StockList> {
                   );
                 },
                 child: Container(
-                  height: 44,
                   margin: EdgeInsets.only(left: 20, bottom: 28),
                   child: Row(
                     children: [
                       Container(
                           width: 40,
-                          height: 28,
                           alignment: Alignment.centerLeft,
                           child: Text(
                             (i + 1).toString(),
@@ -135,12 +136,12 @@ class _StockListState extends State<StockList> {
                             ),
                       ),
                       Container(
+                        width: 250,
                         margin: EdgeInsets.only(left: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              width: 268,
                               margin: EdgeInsets.only(bottom: 5),
                               alignment: Alignment.topLeft,
                               child: Text(
@@ -153,8 +154,23 @@ class _StockListState extends State<StockList> {
                               child: Row(
                                 children: [
                                   Text(
-                                      '${domesticData[i]['stckClpr'].toString()}원',
-                                      style: MyTextStyle.CgS14W400),
+                                    formatCurrency
+                                        .format((domesticData[i]['stckClpr'])),
+                                    style: MyTextStyle.CgS14W400,
+                                  ),
+                                  Text(
+                                    ' ',
+                                    style: MyTextStyle.CgS14W400,
+                                  ),
+                                  Text(
+                                    filterProvider.getPeriod() > 0
+                                        ? filterProvider.getPeriod().toString() + '일 전보다'
+                                        : filterProvider.getPeriod() < 0
+                                            ? (filterProvider.getPeriod() *
+                                                    (-1)).toString() + '일 전보다'
+                                            : '',
+                                    style: MyTextStyle.CgS14W400,
+                                  ),
                                   Text(
                                     ' ${domesticData[i]['totalCtrt'].toString()}%',
                                     style: TextStyle(
@@ -182,15 +198,7 @@ class _StockListState extends State<StockList> {
         ],
       );
     } else {
-      return Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Container(
-          width: 200.0,
-          height: 200.0,
-          color: Colors.white,
-        ),
-      );
+      return _shimmer();
     }
   }
 
@@ -210,23 +218,22 @@ class _StockListState extends State<StockList> {
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation1, animation2) =>
-                          StockDetail(
-                              division: 1,
-                              htsKorIsnm: overseaData[i]['htsKorIsnm'],
-                              mkscShrnIscd: overseaData[i]['mkscShrnIscd'],
-                              prdyCtrt: overseaData[i]['prdyCtrt']),
+
+                          Scaffold(appBar: AppBar(
+                            iconTheme: IconThemeData(color: Colors.grey),
+                            backgroundColor: Colors.white,
+                            elevation: 0.0,
+                          ),body: Container(child: Center(child :Text("차트오픈예정"),))),
                       transitionDuration: Duration(seconds: 0),
                     ),
                   );
                 },
                 child: Container(
-                  height: 44,
                   margin: EdgeInsets.only(left: 20, bottom: 28),
                   child: Row(
                     children: [
                       Container(
                           width: 40,
-                          height: 28,
                           alignment: Alignment.centerLeft,
                           child: Text(
                             (i + 1).toString(),
@@ -244,7 +251,7 @@ class _StockListState extends State<StockList> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              width: 268,
+                              width: 250,
                               margin: EdgeInsets.only(bottom: 5),
                               alignment: Alignment.topLeft,
                               child: Text(
@@ -257,8 +264,10 @@ class _StockListState extends State<StockList> {
                               child: Row(
                                 children: [
                                   Text(
-                                      '${overseaData[i]['stckClpr'].toString()}원',
-                                      style: MyTextStyle.CgS14W400),
+                                    '${overseaData[i]['stckClpr'].toString()}달러',
+                                    style: MyTextStyle.CgS14W400,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                   Text(
                                     ' ${overseaData[i]['totalCtrt'].toString()}%',
                                     style: TextStyle(
@@ -270,6 +279,7 @@ class _StockListState extends State<StockList> {
                                             : overseaData[i]['totalCtrt'] > 0
                                                 ? Colors.red
                                                 : Colors.blue),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
@@ -286,15 +296,7 @@ class _StockListState extends State<StockList> {
         ],
       );
     } else {
-      return Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Container(
-          width: 200.0,
-          height: 200.0,
-          color: Colors.white,
-        ),
-      );
+      return _shimmer();
     }
   }
 
@@ -357,29 +359,44 @@ class _StockListState extends State<StockList> {
                               icon: Icon(Icons.close),
                               onPressed: () async {
                                 if (filterAdapted[index] == '연속 상승/하락') {
+                                  print("연속 상승/하락 분기");
                                   filterProvider.setPeriod(0);
+                                  filterProvider.setTempPeriod(0);
                                   SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
+                                      await SharedPreferences.getInstance();
                                   prefs.setInt("period", 0);
                                   prefs.setInt("tempPeriod", 0);
+                                  filterProvider.resetDomesticData();
+                                  filterProvider.resetOverSeaData();
 
-                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
-                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
-                                  filterProvider.getDomesticData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+                                  filterProvider.getDomesticData(
+                                      filterProvider.getPeriod(),
+                                      filterProvider.getAvlsScal());
 
-                                  filterProvider.getOverseaData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+                                  filterProvider.getOverseaData(
+                                      filterProvider.getPeriod(),
+                                      filterProvider.getAvlsScal());
                                 }
-                                if(filterAdapted[index] == '시가총액'){
+                                if (filterAdapted[index] == '시가총액') {
+                                  print("시가총액 분기");
+
                                   filterProvider.setAvlsScal(0);
+                                  filterProvider.setTempAvlsScal(0);
                                   SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
+                                      await SharedPreferences.getInstance();
                                   prefs.setInt("avlsScal", 0);
                                   prefs.setInt("tempAvlsScal", 0);
-                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
-                                  print('filterProvider.getPeriod() = $filterProvider.getPeriod()');
-                                  filterProvider.getDomesticData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+                                  print(
+                                      'filterProvider.getPeriod() = $filterProvider.getPeriod()');
+                                  print(
+                                      'filterProvider.getPeriod() = $filterProvider.getPeriod()');
+                                  filterProvider.getDomesticData(
+                                      filterProvider.getPeriod(),
+                                      filterProvider.getAvlsScal());
 
-                                  filterProvider.getOverseaData(filterProvider.getPeriod(), filterProvider.getAvlsScal());
+                                  filterProvider.getOverseaData(
+                                      filterProvider.getPeriod(),
+                                      filterProvider.getAvlsScal());
                                 }
 
                                 filterProvider
@@ -399,6 +416,56 @@ class _StockListState extends State<StockList> {
           height: 36,
         )
       ],
+    );
+  }
+
+  Widget _shimmer() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: ListView.builder(
+        itemCount: 20, // 표시할 shimmer item의 개수를 지정
+        itemBuilder: (BuildContext context, int index) {
+          return Container(
+            height: 44,
+            margin: EdgeInsets.only(left: 20, bottom: 28),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 28,
+                  color: Colors.white,
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 20, // 텍스트 컨테이너 높이
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Container(
+                        height: 20, // 텍스트 컨테이너 높이
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

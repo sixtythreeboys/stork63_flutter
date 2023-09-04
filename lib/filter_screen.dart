@@ -110,6 +110,7 @@ class _FilterScreenState extends State<FilterScreen> {
                 onPressed: () async{
                   SharedPreferences prefs = await SharedPreferences.getInstance();
                   prefs.setInt('tempPeriod', 0);
+                  prefs.setInt('tempAvlsScal', 0);
                   printAllPreferences();
                 },
                 child: Row(

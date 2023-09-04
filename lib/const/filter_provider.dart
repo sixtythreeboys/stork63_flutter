@@ -19,6 +19,7 @@ class FilterProvider extends ChangeNotifier {
   var overseaData = [];
 
   void getDomesticData(var period, var avlsScal) async {
+    print("getDomesticData 호출");
     var result = await http.get(Uri.parse(
         'http://15.164.171.244:8000/domestic/kospi/list?period=$period&avlsScal=$avlsScal'));
     var result2 = jsonDecode(utf8.decode(result.bodyBytes));
@@ -29,6 +30,8 @@ class FilterProvider extends ChangeNotifier {
   }
 
   void getOverseaData(var period, var avlsScal) async {
+
+    print("getOverseaData 호출");
     var resultOversea = await http.get(Uri.parse(
         'http://15.164.171.244:8000/oversea/list?period=${period}&avlsScal=${avlsScal}'));
     var resultOversea2 = jsonDecode(utf8.decode(resultOversea.bodyBytes));
@@ -74,6 +77,15 @@ class FilterProvider extends ChangeNotifier {
   }
   setTempAvlsScal(var tempAvlsScal) {
     this.tempAvlsScal = tempAvlsScal;
+    notifyListeners();
+  }
+
+  resetOverSeaData() {
+    overseaData = [];
+    notifyListeners();
+  }
+  resetDomesticData() {
+    domesticData = [];
     notifyListeners();
   }
 
